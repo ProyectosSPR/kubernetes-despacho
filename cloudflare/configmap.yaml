@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cloudflared-config
+data:
+  config.yml: |
+    tunnel: 7abf911d-66a9-4408-8638-30dce3d83ccb
+    
+    ingress:
+      # Evolution API - Manager interface
+      - hostname: evo.automateai.com.mx
+        service: http://evolution-api-service:80
+        originRequest:
+          httpHostHeader: evo.automateai.com.mx
+      
+      
+      # Puedes agregar más servicios aquí
+      # - hostname: app2.automateai.com.mx
+      #   service: http://app2-service:80
+      
+      # - hostname: app3.automateai.com.mx
+      #   service: http://app3-service:3000
+      
+      # Catch-all rule (debe ser la última)
+      - service: http_status:404

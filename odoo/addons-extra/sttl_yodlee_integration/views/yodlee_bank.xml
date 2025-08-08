@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_yodlee_sync_form" model="ir.ui.view">
+        <field name="name">Yodlee Bank Details</field>
+        <field name="model">yodlee.bank</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <field widget="statusbar" name="status" readonly="1"/>
+                    <button type="object" class="btn-primary" name="connect_accounts" string="Connect Accounts" invisible="status == 'connected'"/>
+                    <button type="object" name="disconnect_accounts" string="Disconnect accounts" invisible="status == 'not_connected'"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <span class="o_form_label">
+                            <label for="name">Name</label>
+                        </span>
+                        <h1>
+                            <field name="name" />
+                        </h1>
+                    </div>
+                    <group>
+                        <field name="login_name"/>
+                        <field name="account_ids" readonly="1">
+                            <tree>
+                                <field name="name" />
+                                <field name="account_number"/>
+                                <field name="provider_name"/>
+                                <field name="account_type" />
+                            </tree>
+                        </field>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_yodlee_sync_tree" model="ir.ui.view">
+        <field name="name">Yodlee Banks</field>
+        <field name="model">yodlee.bank</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+</odoo>

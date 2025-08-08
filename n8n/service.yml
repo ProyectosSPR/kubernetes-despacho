@@ -1,0 +1,17 @@
+# Service para exponer n8n
+apiVersion: v1
+kind: Service
+metadata:
+  name: n8n-service
+  namespace: default
+  labels:
+    app: n8n
+spec:
+  type: LoadBalancer   # Cambiar a LoadBalancer o NodePort si necesitas acceso externo directo
+  ports:
+  - port: 5678
+    targetPort: 5678
+    protocol: TCP
+    name: http
+  selector:
+    app: n8n

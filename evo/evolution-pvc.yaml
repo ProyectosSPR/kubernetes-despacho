@@ -1,0 +1,13 @@
+# PersistentVolumeClaim para instances de Evolution API
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: evolution-instances-pvc
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+  storageClassName: do-block-storage  # Usando tu storageClass de DigitalOcean

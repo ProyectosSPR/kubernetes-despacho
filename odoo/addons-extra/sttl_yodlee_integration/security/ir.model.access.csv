@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_yodlee_bank,sttl_yodlee_integration.yodlee_bank,model_yodlee_bank,base.group_user,1,1,1,1
+access_yodlee_account,sttl_yodlee_integration.yodlee_account,model_yodlee_account,base.group_user,1,1,1,1
+access_yodlee_transaction_wizard,sttl_yodlee_integration.yodlee_transaction_wizard,model_yodlee_transaction_wizard,base.group_user,1,1,1,1

@@ -1,0 +1,182 @@
+input.widget_daterange[readonly] {
+    background-color: $white;
+}
+
+input.widget_daterange:focus {
+    border: 1px solid $primary;
+}
+
+.widget-daterange-picker-popover {
+    position: absolute;
+    background-color: #fff;
+    border: 1px solid $o-gray-400;
+    padding: 10px;
+    border-radius: 5px !important;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    white-space: nowrap;
+
+    &:hover {
+        box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .popover-month-container {
+        display: flex;
+        align-items: stretch;
+        min-height: 100%;
+        height: auto;
+
+        .popover-month-left,
+         .popover-month-right {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+
+            h4 {
+                font-size: 16px;
+                margin: 0 0 8px;
+                color: $primary;
+            }
+
+            .popover-weekdays {
+                display: grid;
+                grid-template-columns: repeat(7, 1fr);
+                gap: 5px;
+
+                span {
+                    display: inline-block;
+                    text-align: center;
+                    font-size: 14px;
+                    color: $gray-800;
+                    padding: 4px;
+                    border-radius: 3px;
+                    transition: background-color 0.3s;
+                }
+            }
+
+            .popover-days {
+                display: grid;
+                grid-template-columns: repeat(7, 1fr);
+                gap: 5px;
+
+                span {
+                    display: inline-block;
+                    text-align: center;
+                    font-size: 14px;
+                    color: $gray-600;
+                    padding: 3px 5px;
+                    margin: 1px;
+                    border-radius: 50%;
+                    transition: background-color 0.3s;
+
+                    &:hover {
+                        background-color: $dark;
+                    }
+
+                    &.hidden {
+                        pointer-events: none;
+                        opacity: 0;
+                        visibility: hidden;
+                    }
+
+                    &.impossible {
+                        pointer-events: none;
+                        color: $gray-300;
+                    }
+                }
+
+                .selected {
+                    background-color: $primary;
+                    color: $white;
+                }
+
+                .included {
+                    background-color: $gray-400;
+                }
+            }
+        }
+
+        .popover-separator {
+            width: 1px;
+            background-color: $secondary;
+            margin: 0 10px;
+            align-self: stretch;
+        }
+
+        .popover-arrow {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: auto;
+            font-size: 20px;
+            font-weight: bold;
+            color: $primary;
+            cursor: pointer;
+            user-select: none;
+
+            &.popover-arrow-left {
+                margin-right: 10px;
+            }
+
+            &.popover-arrow-right {
+                margin-left: 10px;
+            }
+
+            &.hidden {
+                pointer-events: none;
+                opacity: 0;
+                visibility: hidden;
+            }
+
+            &:hover {
+                color: darken($primary, 25%);
+            }
+        }
+    }
+
+    .popover-footer {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 10px;
+        padding: 10px 0;
+        border-top: 1px solid $o-gray-400;
+    }
+
+    .btn {
+        padding: 8px 16px;
+        font-size: 14px;
+        background-color: $primary;
+        color: $white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+
+        &:hover {
+            background-color: darken($primary, 10%);
+        }
+    }
+
+    @media screen and (max-width: 768px) {
+
+        width: 100%;
+
+        .popover-month-container {
+            .popover-arrow {
+                width: 30px;
+                height: auto;
+                font-size: 14px;
+
+                &.popover-arrow-left {
+                    margin-right: 0px;
+                }
+
+                &.popover-arrow-right {
+                    margin-left: 0px;
+                }
+            }
+        }
+
+    }
+}

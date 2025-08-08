@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-proxy-manager
+  labels:
+    app: nginx-proxy-manager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-proxy-manager
+  template:
+    metadata:
+      labels:
+        app: nginx-proxy-manager
+    spec:
+      containers:
+        - name: nginx-proxy-manager
+          image: jc21/nginx-proxy-manager:latest
+          ports:
+            - containerPort: 80
+              name: http
+            - containerPort: 443
+              name: https
+            - containerPort: 81
+              name: admin
+          volumeMounts:
+            - name: nginx-data
+              mountPath: /data
+            - name: nginx-letsencrypt
+              mountPath: /etc/letsencrypt
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          env:
+            - name: DISABLE_IPV6
+              value: "true"
+      volumes:
+        - name: nginx-data
+          persistentVolumeClaim:
+            claimName: nginx-data-pvc
+        - name: nginx-letsencrypt
+          persistentVolumeClaim:
+            claimName: nginx-letsencrypt-pvc

@@ -1,0 +1,42 @@
+# ConfigMap para configuración de Evolution API
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: evolution-config
+  namespace: default
+data:
+  # Database configuration
+  DATABASE_ENABLED: "true"
+  DATABASE_PROVIDER: "postgresql"
+  DATABASE_CONNECTION_CLIENT_NAME: "evolution_exchange"
+  DATABASE_SAVE_DATA_INSTANCE: "true"
+  DATABASE_SAVE_DATA_NEW_MESSAGE: "true"
+  DATABASE_SAVE_MESSAGE_UPDATE: "true"
+  DATABASE_SAVE_DATA_CONTACTS: "true"
+  DATABASE_SAVE_DATA_CHATS: "true"
+  DATABASE_SAVE_DATA_LABELS: "true"
+  DATABASE_SAVE_DATA_HISTORIC: "true"
+  
+  # Cache configuration
+  CACHE_REDIS_ENABLED: "true"
+  CACHE_REDIS_PREFIX_KEY: "evolution"
+  CACHE_REDIS_SAVE_INSTANCES: "false"
+  CACHE_LOCAL_ENABLED: "false"
+  
+  # Server configuration
+  SERVER_PORT: "8080"
+  SERVER_URL: "https://evo.automateai.com.mx"
+  
+  # Webhook configuration
+  WEBHOOK_BASE: "https://evo.automateai.com.mx"
+  
+  # Static files configuration
+  MANAGER_URL: "https://evo.automateai.com.mx/manager"
+  
+  # WhatsApp configuration
+  CONFIG_SESSION_PHONE_VERSION: "2.3000.1023204200"
+  
+  # Logs
+  LOG_LEVEL: "ERROR,WARN,DEBUG,INFO,LOG,VERBOSE,DARK,WEBHOOKS"
+  LOG_COLOR: "true"
+  LOG_BAILEYS: "false"

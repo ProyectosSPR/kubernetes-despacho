@@ -1,0 +1,10 @@
+FROM odoo:17
+
+# Crea el directorio para los addons extra
+USER root
+RUN mkdir -p /mnt/extra-addons
+COPY ./addons-extra /mnt/extra-addons
+RUN chown -R odoo:odoo /mnt/extra-addons
+
+# Asegura que el usuario vuelva a ser 'odoo'
+USER odoo

@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="snippet_daterange.WidgetDateRangePicker">
+        <div class="widget-daterange-picker-popover"
+             t-att-style="'top:' + top + '; left:' + left + ';'"
+             tabindex="-1" >
+            <div class="popover-month-container">
+                <!-- Left Arrow -->
+                <div class="popover-arrow popover-arrow-left"
+                     t-att-class="!data['month_left_more'] ? 'hidden' : ''"
+                     t-on-click="onLeftDateRange" >
+                    &lt; <!-- This represents the left arrow -->
+                </div>
+
+                <div class="popover-month-left">
+                    <h4 class="popover-show-month" t-out="data['month_left']" />
+
+                    <div class="popover-weekdays">
+                        <span>Mo</span>
+                        <span>Tu</span>
+                        <span>We</span>
+                        <span>Th</span>
+                        <span>Fr</span>
+                        <span>Sa</span>
+                        <span>Su</span>
+                    </div>
+
+                    <t t-foreach="data['days_left']" t-as="days" t-key="days_index">
+                        <div class="popover-days">
+                            <t t-foreach="days" t-as="day" t-key="day.day">
+                                <t t-if="!day.visible">
+                                    <span t-att-class="'popover-day-' + day.day + ' hidden'"
+                                          t-out="day.real_day"
+                                          data-month="left"
+                                          t-att-data-day="day.day"
+                                          t-att-data-real-day="day.real_day"
+                                          t-on-click="onSelectDateRange" />
+                                </t>
+                                <t t-elif="!day.possible">
+                                    <span t-att-class="'popover-day-' + day.day + ' impossible'"
+                                          t-out="day.real_day"
+                                          data-month="left"
+                                          t-att-data-day="day.day"
+                                          t-att-data-real-day="day.real_day"
+                                          t-on-click="onSelectDateRange" />
+                                </t>
+                                <t t-else="">
+                                    <span t-att-class="'popover-day-' + day.day"
+                                          t-out="day.real_day"
+                                          data-month="left"
+                                          t-att-data-day="day.day"
+                                          t-att-data-real-day="day.real_day"
+                                          t-on-click="onSelectDateRange" />
+                                </t>
+                            </t>
+                        </div>
+                    </t>
+
+                </div>
+
+                <div class="popover-separator"></div>
+
+                <div class="popover-month-right">
+                    <h4 class="popover-show-month" t-out="data['month_right']" />
+
+                    <div class="popover-weekdays">
+                        <span>Mo</span>
+                        <span>Tu</span>
+                        <span>We</span>
+                        <span>Th</span>
+                        <span>Fr</span>
+                        <span>Sa</span>
+                        <span>Su</span>
+                    </div>
+
+                    <t t-foreach="data['days_right']" t-as="days" t-key="days_index">
+                        <div class="popover-days">
+                            <t t-foreach="days" t-as="day" t-key="day.day">
+                                <t t-if="!day.visible">
+                                    <span t-att-class="'popover-day-' + day.day + ' hidden'"
+                                          t-out="day.real_day"
+                                          data-month="right"
+                                          t-att-data-day="day.day"
+                                          t-att-data-real-day="day.real_day"
+                                          t-on-click="onSelectDateRange" />
+                                </t>
+                                <t t-elif="!day.possible">
+                                    <span t-att-class="'popover-day-' + day.day + ' impossible'"
+                                          t-out="day.real_day"
+                                          data-month="right"
+                                          t-att-data-day="day.day"
+                                          t-att-data-real-day="day.real_day"
+                                          t-on-click="onSelectDateRange" />
+                                </t>
+                                <t t-else="">
+                                    <span t-att-class="'popover-day-' + day.day"
+                                          t-out="day.real_day"
+                                          data-month="right"
+                                          t-att-data-day="day.day"
+                                          t-att-data-real-day="day.real_day"
+                                          t-on-click="onSelectDateRange" />
+                                </t>
+                            </t>
+                        </div>
+                    </t>
+
+                </div>
+
+                <!-- Right Arrow -->
+                <div class="popover-arrow popover-arrow-right"
+                     t-att-class="!data['month_right_more'] ? 'hidden' : ''"
+                     t-on-click="onRightDateRange" >
+                    &gt; <!-- This represents the right arrow -->
+                </div>
+            </div>
+            <div class="popover-footer">
+                <button class="btn btn-primary" t-on-click="onDone">Done</button>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="snippet_daterange.WidgetDateRangePickerMobile">
+        <div class="widget-daterange-picker-popover"
+             t-att-style="'top:' + top + '; left:' + left + ';'"
+             tabindex="-1" >
+            <div class="popover-month-container">
+                <!-- Left Arrow -->
+                <div class="popover-arrow popover-arrow-left"
+                     t-att-class="!data['month_left_more'] ? 'hidden' : ''"
+                     t-on-click="onLeftDateRange" >
+                    &lt; <!-- This represents the left arrow -->
+                </div>
+
+                <div class="popover-month-left">
+                    <h4 class="popover-show-month" t-out="data['month_left']" />
+
+                    <div class="popover-weekdays">
+                        <span>Mo</span>
+                        <span>Tu</span>
+                        <span>We</span>
+                        <span>Th</span>
+                        <span>Fr</span>
+                        <span>Sa</span>
+                        <span>Su</span>
+                    </div>
+
+                    <t t-foreach="data['days_left']" t-as="days" t-key="days_index">
+                        <div class="popover-days">
+                            <t t-foreach="days" t-as="day" t-key="day.day">
+                                <t t-if="!day.visible">
+                                    <span t-att-class="'popover-day-' + day.day + ' hidden'"
+                                          t-out="day.real_day"
+                                          data-month="left"
+                                          t-att-data-day="day.day"
+                                          t-att-data-real-day="day.real_day"
+                                          t-on-click="onSelectDateRange" />
+                                </t>
+                                <t t-elif="!day.possible">
+                                    <span t-att-class="'popover-day-' + day.day + ' impossible'"
+                                          t-out="day.real_day"
+                                          data-month="left"
+                                          t-att-data-day="day.day"
+                                          t-att-data-real-day="day.real_day"
+                                          t-on-click="onSelectDateRange" />
+                                </t>
+                                <t t-else="">
+                                    <span t-att-class="'popover-day-' + day.day"
+                                          t-out="day.real_day"
+                                          data-month="left"
+                                          t-att-data-day="day.day"
+                                          t-att-data-real-day="day.real_day"
+                                          t-on-click="onSelectDateRange" />
+                                </t>
+                            </t>
+                        </div>
+                    </t>
+
+                </div>
+
+                <!-- Right Arrow -->
+                <div class="popover-arrow popover-arrow-right"
+                     t-att-class="!data['month_right_more'] ? 'hidden' : ''"
+                     t-on-click="onRightDateRange" >
+                    &gt; <!-- This represents the right arrow -->
+                </div>
+            </div>
+            <div class="popover-footer">
+                <button class="btn btn-primary" t-on-click="onDone">Done</button>
+            </div>
+        </div>
+    </t>
+
+</templates>
