@@ -747,6 +747,7 @@ Si requiere timbrar la factura nuevamente deshabilite el checkbox de "Proceso de
                 response = requests.post(url,
                                          auth=None, data=json.dumps(values),
                                          headers={"Content-type": "application/json"})
+                
             except Exception as e:
                 error = str(e)
                 invoice.write({'proceso_timbrado': False})

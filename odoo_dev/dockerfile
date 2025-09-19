@@ -1,0 +1,53 @@
+FROM odoo:17
+
+# ==== Parte 1: Configuración de addons ====
+USER root
+RUN mkdir -p /mnt/extra-addons
+COPY ./addons-extra /mnt/extra-addons
+RUN chown -R odoo:odoo /mnt/extra-addons
+
+# ==== Parte 2: Instalar Jupyter y librerías ====
+RUN apt-get update && apt-get install -y \
+    python3-pip python3-dev build-essential \
+    && pip3 install --upgrade pip \
+    && pip3 install jupyterlab ipython ipykernel pandas requests odoorpc \
+    && apt-get clean
+
+# ==== Parte 3: Configurar entorno de Jupyter ====
+RUN mkdir -p /opt/jupyter && chown -R odoo:odoo /opt/jupyter
+
+# Script de arranque automático del entorno Odoo en Jupyter
+RUN echo "\
+import odoo\n\
+import builtins\n\
+odoo.cli.server.report_configuration = lambda _: None\n\
+odoo.tools.config.parse_config(['-c', '/etc/odoo/odoo.conf'])\n\
+from odoo.api import Environment\n\
+from odoo import SUPERUSER_ID\n\
+import psycopg2\n\
+db_name = odoo.tools.config['db_name']\n\
+if not db_name:\n\
+    print('⚠️ No hay base de datos configurada. Conéctate manualmente.')\n\
+else:\n\
+    registry = odoo.registry(db_name)\n\
+    cr = odoo.sql_db.db_connect(db_name).cursor()\n\
+    env = Environment(cr, SUPERUSER_ID, {})\n\
+    builtins.env = env\n\
+    builtins.cr = cr\n\
+    print(f'✅ Entorno Odoo listo en env (BD: {db_name})')\n\
+" > /opt/jupyter/odoo_shell_init.py
+
+# Celda automática para notebooks nuevos
+RUN mkdir -p /opt/jupyter/.ipython/profile_default/startup
+RUN echo "exec(open('/opt/jupyter/odoo_shell_init.py').read())" \
+    > /opt/jupyter/.ipython/profile_default/startup/00-odoo-shell.py
+
+# Asegurar que IPython use el perfil creado
+ENV IPYTHONDIR=/opt/jupyter/.ipython
+
+# ==== Parte 4: Exponer puertos ====
+EXPOSE 8069 8888
+
+# ==== Parte 5: Arranque combinado Odoo + Jupyter ====
+USER odoo
+CMD ["bash", "-c", "odoo -c /etc/odoo/odoo.conf & jupyter lab --ip=0.0.0.0 --port=8888 --ServerApp.token=admin --notebook-dir=/opt/jupyter --no-browser"]

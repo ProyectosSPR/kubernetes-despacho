@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="s_website_form_options" inherit_id="website.s_website_form_options">
+        <we-button data-custom-field="datetime">Date &amp; Time</we-button>
+        <xpath expr="//we-button[@data-custom-field='datetime']" position="after">
+            <we-button data-custom-field="daterange">Date Range</we-button>
+        </xpath>
+    </template>
+
+</odoo>

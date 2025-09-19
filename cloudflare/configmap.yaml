@@ -4,7 +4,7 @@ metadata:
   name: cloudflared-config
 data:
   config.yml: |
-    tunnel: 7abf911d-66a9-4408-8638-30dce3d83ccb
+    tunnel: c3c928d1-ca69-42c7-94a7-8024439b9508
     
     ingress:
       # Evolution API - Manager interface
@@ -13,13 +13,12 @@ data:
         originRequest:
           httpHostHeader: evo.automateai.com.mx
       
-      
-      # Puedes agregar más servicios aquí
-      # - hostname: app2.automateai.com.mx
-      #   service: http://app2-service:80
-      
-      # - hostname: app3.automateai.com.mx
-      #   service: http://app3-service:3000
-      
-      # Catch-all rule (debe ser la última)
+      # Odoo con configuración mejorada para HTTPS
+      - hostname: odoo.automateai.com.mx
+        service: http://odoo:8069
+        originRequest:
+          httpHostHeader: odoo.automateai.com.mx
+          originServerName: odoo.automateai.com.mx
+          noTLSVerify: false
+          
       - service: http_status:404

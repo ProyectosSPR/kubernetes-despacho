@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="snippet_daterange.s_daterange_000_xml" model="ir.asset">
+        <field name="name">DateRange 000 XML</field>
+        <field name="bundle">web.assets_frontend</field>
+        <field name="path">snippet_daterange/static/src/snippets/s_daterange/000.xml</field>
+    </record>
+
+</odoo>

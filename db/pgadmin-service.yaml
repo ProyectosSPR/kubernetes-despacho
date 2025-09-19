@@ -17,7 +17,7 @@ spec:
   selector:
     app: pgadmin
   ports:
-    - port: 80        # Puerto del LoadBalancer
+    - port: 8080        # Puerto del LoadBalancer
       targetPort: 80  # Puerto del contenedor
       protocol: TCP
   

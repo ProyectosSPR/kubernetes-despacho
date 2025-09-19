@@ -20,7 +20,7 @@ spec:
       # --- FIN DE LA SECCIÓN AÑADIDA ---
       containers:
         - name: odoo
-          image: proyectosspr/odoo:v1.4
+          image: proyectosspr/odoo:saas
           ports:
             - containerPort: 8069
           # La sección 'env' ha sido eliminada para usar solo odoo.conf

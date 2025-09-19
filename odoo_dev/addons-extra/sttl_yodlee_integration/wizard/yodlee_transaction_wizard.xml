@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_yodlee_transactions_sync_wizard_form" model="ir.ui.view">
+        <field name="name">Yodlee Transactions</field>
+        <field name="model">yodlee.transaction.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <group>
+                        <field name="bank_id" />
+                        <field name="account_ids" widget="many2many_tags"
+                            domain="[('bank_id', '=', bank_id)]" />
+                    </group>
+                    <group>
+                        <field name="from_date" />
+                        <field name="to_date" />
+                    </group>
+                </group>
+                <footer>
+                    <button string="Fetch Transactions" name="fetch_transactions" type="object"
+                        class="oe_highlight" data-hotkey="q" />
+                    <button string="Cancel" class="btn btn-secondary" special="cancel"
+                        data-hotkey="z" />
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>
