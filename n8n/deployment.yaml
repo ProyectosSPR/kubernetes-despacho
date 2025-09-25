@@ -101,16 +101,16 @@ spec:
         
         resources:
           requests:
-            memory: "256Mi"
-            cpu: "250m"
+            memory: "2Gi"
+            cpu: "1000m"
           limits:
-            memory: "512Mi"
-            cpu: "500m"
+            memory: "5Gi"
+            cpu: "2000m"
         
         # HEALTH CHECKS SIMPLIFICADOS
         livenessProbe:
           httpGet:
-            path: /
+            path: /healthz
             port: 5678
             scheme: HTTP
           initialDelaySeconds: 60

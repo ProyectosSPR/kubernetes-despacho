@@ -7,7 +7,7 @@ metadata:
   labels:
     app: n8n
 spec:
-  type: LoadBalancer   # Cambiar a LoadBalancer o NodePort si necesitas acceso externo directo
+  type: ClusterIP   # Usar ClusterIP para enrutar via Cloudflare Tunnel
   ports:
   - port: 5678
     targetPort: 5678

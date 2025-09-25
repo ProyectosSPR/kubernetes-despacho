@@ -4,6 +4,9 @@ despacho
 
 web/database/manager
 
+
+# para odoo 19
+odoo -d tu_base_de_datos -i base --without-demo=all --http-port=8067 --stop-after-init
 # Dml-odoo
 
 odoo -i base --without-demo=all --xmlrpc-port=8067 --stop-after-init

@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: odoo19
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: odoo19
+  template:
+    metadata:
+      labels:
+        app: odoo19
+    spec:
+      securityContext:
+        fsGroup: 101
+      containers:
+        - name: odoo19
+          image: odoo:19.0
+          ports:
+            - containerPort: 8069
+            - containerPort: 8888
+            - containerPort: 8072 
+          env:
+            - name: HTTP_X_FORWARDED_PROTO
+              value: "https"
+            - name: HTTP_X_FORWARDED_HOST
+              value: "automateai.com.mx"
+            - name: HTTP_X_FORWARDED_PORT
+              value: "443"
+            - name: HOST
+              value: "automateai.com.mx"
+          
+          volumeMounts:
+            - name: odoo-data19
+              mountPath: /var/lib/odoo
+            - name: config-volume
+              mountPath: /etc/odoo
+              readOnly: true
+            - name: odoo-extra-addons19
+              mountPath: /mnt/extra-addons   # 🔹 Aquí montamos tu carpeta de módulos extra
+          
+          resources:
+            requests:
+              memory: "3Gi"
+              cpu: "2"
+            limits:
+              memory: "5Gi"
+              cpu: "3"
+      volumes:
+        - name: odoo-data19
+          persistentVolumeClaim:
+            claimName: odoo-data19
+        - name: config-volume
+          configMap:
+            name: odoo-config19
+            items:
+              - key: odoo.conf
+                path: odoo.conf
+        - name: odoo-extra-addons19
+          persistentVolumeClaim:
+            claimName: odoo-extra-addons19

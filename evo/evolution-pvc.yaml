@@ -10,4 +10,4 @@ spec:
   resources:
     requests:
       storage: 2Gi
-  storageClassName: do-block-storage  # Usando tu storageClass de DigitalOcean
+ # storageClassName: do-block-storage  # Usando tu storageClass de DigitalOcean

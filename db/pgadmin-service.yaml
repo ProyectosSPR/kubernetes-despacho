@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: pgadmin
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: pgadmin
   ports:
@@ -11,4 +11,3 @@ spec:
       port: 8080
       targetPort: 80
       protocol: TCP
-      nodePort: 30080  # puedes elegir un puerto entre 30000-32767

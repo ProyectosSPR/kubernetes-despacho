@@ -1,9 +1,7 @@
-# PersistentVolumeClaim para datos de n8n
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: n8n-data-pvc
-  namespace: default
+  name: odoo-data
 spec:
   accessModes:
     - ReadWriteOnce
