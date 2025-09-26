@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: odoo
+  name: odoo18
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: odoo
+      app: odoo18
   template:
     metadata:
       labels:
-        app: odoo
+        app: odoo18
     spec:
       securityContext:
         fsGroup: 101
       containers:
-        - name: odoo
-          image: proyectosspr/odoo:v1.4-dev3
+        - name: odoo18
+          image: proyectosspr/odoo:git
           ports:
             - containerPort: 8069
             - containerPort: 8888
@@ -32,12 +32,12 @@ spec:
               value: "odoo.automateai.com.mx"
           
           volumeMounts:
-            - name: odoo-data
+            - name: odoo-data18
               mountPath: /var/lib/odoo
-            - name: config-volume
+            - name: config-volume18
               mountPath: /etc/odoo
               readOnly: true
-            - name: odoo-extra-addons
+            - name: odoo-extra-addons18
               mountPath: /mnt/extra-addons   # 🔹 Aquí montamos tu carpeta de módulos extra
           
           resources:
@@ -48,15 +48,15 @@ spec:
               memory: "5Gi"
               cpu: "3"
       volumes:
-        - name: odoo-data
+        - name: odoo-data18
           persistentVolumeClaim:
-            claimName: odoo-data
-        - name: config-volume
+            claimName: odoo-data18
+        - name: config-volume18
           configMap:
-            name: odoo-config
+            name: odoo-config18
             items:
               - key: odoo.conf
                 path: odoo.conf
-        - name: odoo-extra-addons
+        - name: odoo-extra-addons18
           persistentVolumeClaim:
-            claimName: odoo-extra-addons
+            claimName: odoo-extra-addons18
