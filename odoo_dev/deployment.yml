@@ -14,9 +14,28 @@ spec:
     spec:
       securityContext:
         fsGroup: 101
+
+      initContainers:
+      - name: fix-permissions
+        image: busybox:latest
+        # Comando reforzado: asegura propietario y permisos de escritura en cada arranque.
+        command: ["sh", "-c", "chown -R 101:101 /var/lib/odoo /mnt/extra-addons && chmod -R 775 /var/lib/odoo /mnt/extra-addons"]
+        volumeMounts:
+          - name: odoo-data18
+            mountPath: /var/lib/odoo
+          - name: odoo-extra-addons18
+            mountPath: /mnt/extra-addons
+
       containers:
         - name: odoo18
-          image: proyectosspr/odoo:git
+          # Asegúrate de que este sea el tag de tu imagen corregida.
+          image: proyectosspr/odoo_18_git:3.0
+          # Forza a Kubernetes a descargar siempre la última versión de la imagen.
+          imagePullPolicy: Always 
+          
+          # Se elimina el 'command' y 'args' de 'sleep' para que el pod use el CMD del Dockerfile.
+          # Se elimina el 'securityContext' con 'runAsUser' porque el Dockerfile ya lo gestiona.
+
           ports:
             - containerPort: 8069
             - containerPort: 8888
@@ -38,15 +57,16 @@ spec:
               mountPath: /etc/odoo
               readOnly: true
             - name: odoo-extra-addons18
-              mountPath: /mnt/extra-addons   # 🔹 Aquí montamos tu carpeta de módulos extra
+              mountPath: /mnt/extra-addons
           
           resources:
             requests:
-              memory: "3Gi"
-              cpu: "2"
-            limits:
-              memory: "5Gi"
+              memory: "4Gi"
               cpu: "3"
+            limits:
+              memory: "6Gi"
+              cpu: "4"
+
       volumes:
         - name: odoo-data18
           persistentVolumeClaim:

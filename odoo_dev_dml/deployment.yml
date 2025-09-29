@@ -14,13 +14,27 @@ spec:
     spec:
       securityContext:
         fsGroup: 101
+      
+      initContainers:
+      - name: fix-permissions
+        image: busybox:latest
+        command: ["sh", "-c", "chown -R 101:101 /var/lib/odoo && chown -R 101:101 /mnt/extra-addons"]
+        volumeMounts:
+        - name: odoo-data
+          mountPath: /var/lib/odoo
+        - name: odoo-extra-addons
+          mountPath: /mnt/extra-addons
+
       containers:
         - name: odoo
-          image: dmlautomatizaciones/odoo_dml
+          image: proyectosspr/odoo_dml_16:1.0
+          securityContext:
+            runAsUser: 101
+            runAsGroup: 101
           ports:
             - containerPort: 8069
             - containerPort: 8888
-            - containerPort: 8072 
+            - containerPort: 8072
           env:
             - name: HTTP_X_FORWARDED_PROTO
               value: "https"
@@ -38,7 +52,7 @@ spec:
               mountPath: /etc/odoo
               readOnly: true
             - name: odoo-extra-addons
-              mountPath: /mnt/extra-addons   # 🔹 Aquí montamos tu carpeta de módulos extra
+              mountPath: /mnt/extra-addons
           
           resources:
             requests:

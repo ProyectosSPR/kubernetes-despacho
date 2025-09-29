@@ -1,34 +1,31 @@
-# Usa la imagen oficial de Odoo 17
-FROM odoo:17
+# Usa la imagen oficial de Odoo 18
+FROM odoo:18
 
-# ==== Parte 1: Instalación de dependencias del sistema y Git ====
+# ==== Parte 1: Definir variables de entorno ====
+ENV JUPYTER_HOME=/opt/jupyter
+ENV ODOO_EXTRA_ADDONS=/mnt/extra-addons
+
+# ==== Parte 2: Modificación de usuario, dependencias, clonado y permisos ====
 USER root
-# Se actualizan los repositorios y se instala git, además de las dependencias para Jupyter
-# Se añade --no-install-recommends para reducir el tamaño de la imagen
+
+# El usuario 'odoo' ya existe en la imagen base, así que lo modificamos para asegurar
+# que tenga un directorio home (-d) y un shell (-s).
+# Esto soluciona los errores de 'uid not found' y de permisos de Jupyter.
+RUN usermod -d /var/lib/odoo -s /bin/bash odoo
+
+# Se agrupan múltiples comandos en una sola capa (RUN) para optimizar la imagen
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     python3-pip \
-    python3-dev \
-    build-essential \
-    # Se limpia el caché de apt para mantener la imagen ligera
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    && apt-get clean && rm -rf /var/lib/apt/lists/* \
+    && git clone --depth 1 https://github.com/ProyectosSPR/modulos_odoo18.git ${ODOO_EXTRA_ADDONS} \
+    && pip3 install --no-cache-dir --break-system-packages \
+    jupyterlab ipython ipykernel pandas requests odoorpc \
+    && mkdir -p ${JUPYTER_HOME} \
+    && chown -R odoo:root ${ODOO_EXTRA_ADDONS} ${JUPYTER_HOME}
 
-# ==== Parte 2: Clonar el repositorio de addons extra ====
-# Se clona directamente desde GitHub en la carpeta de addons
-# Usamos --depth 1 para clonar solo la última versión, haciendo el proceso más rápido y ligero
-RUN git clone --depth 1 https://github.com/ProyectosSPR/modulos_odoo.git /mnt/extra-addons
-
-# ==== Parte 3: Instalar librerías de Python (Jupyter) ====
-RUN pip3 install --no-cache-dir --upgrade pip \
-    && pip3 install --no-cache-dir jupyterlab ipython ipykernel pandas requests odoorpc
-
-# ==== Parte 4: Configurar entorno de Jupyter y permisos ====
-# Se crea el directorio para los notebooks
-RUN mkdir -p /opt/jupyter
-# Se asigna la propiedad de ambas carpetas al usuario 'odoo' en un solo paso
-RUN chown -R odoo:odoo /mnt/extra-addons /opt/jupyter
-
-# Script de arranque automático del entorno Odoo en Jupyter (sin cambios)
+# ==== Parte 3: Configurar entorno de Jupyter ====
+# Script de arranque automático del entorno Odoo en Jupyter
 RUN echo "\
 import odoo\n\
 import builtins\n\
@@ -47,20 +44,18 @@ else:\n\
     builtins.env = env\n\
     builtins.cr = cr\n\
     print(f'✅ Entorno Odoo listo en env (BD: {db_name})')\n\
-" > /opt/jupyter/odoo_shell_init.py
+" > ${JUPYTER_HOME}/odoo_shell_init.py
 
-# Celda automática para notebooks nuevos (sin cambios)
-RUN mkdir -p /opt/jupyter/.ipython/profile_default/startup
-RUN echo "exec(open('/opt/jupyter/odoo_shell_init.py').read())" \
-    > /opt/jupyter/.ipython/profile_default/startup/00-odoo-shell.py
+# Celda automática para notebooks nuevos
+RUN mkdir -p ${JUPYTER_HOME}/.ipython/profile_default/startup
+RUN echo "exec(open('${JUPYTER_HOME}/odoo_shell_init.py').read())" \
+    > ${JUPYTER_HOME}/.ipython/profile_default/startup/00-odoo-shell.py
 
-# Asegurar que IPython use el perfil creado (sin cambios)
-ENV IPYTHONDIR=/opt/jupyter/.ipython
+# Asegurar que IPython use el perfil creado
+ENV IPYTHONDIR=${JUPYTER_HOME}/.ipython
+RUN chown -R odoo:root ${JUPYTER_HOME}
 
-# ==== Parte 5: Exponer puertos ====
+# ==== Parte 4: Exponer puertos y configurar arranque ====
 EXPOSE 8069 8888
-
-# ==== Parte 6: Arranque combinado Odoo + Jupyter ====
 USER odoo
-# El comando de arranque se mantiene igual
-CMD ["bash", "-c", "odoo -c /etc/odoo/odoo.conf & jupyter lab --ip=0.0.0.0 --port=8888 --ServerApp.token=admin --notebook-dir=/opt/jupyter --no-browser"]
+CMD ["bash", "-c", "odoo -c /etc/odoo/odoo.conf & jupyter lab --ip=0.0.0.0 --port=8888 --ServerApp.token=admin --notebook-dir=${JUPYTER_HOME} --no-browser"]
