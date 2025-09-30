@@ -18,7 +18,6 @@ spec:
       initContainers:
       - name: fix-permissions
         image: busybox:latest
-        # Comando reforzado: asegura propietario y permisos de escritura en cada arranque.
         command: ["sh", "-c", "chown -R 101:101 /var/lib/odoo /mnt/extra-addons && chmod -R 775 /var/lib/odoo /mnt/extra-addons"]
         volumeMounts:
           - name: odoo-data18
@@ -28,18 +27,22 @@ spec:
 
       containers:
         - name: odoo18
-          # Asegúrate de que este sea el tag de tu imagen corregida.
           image: proyectosspr/odoo_18_git:3.0
-          # Forza a Kubernetes a descargar siempre la última versión de la imagen.
           imagePullPolicy: Always 
           
-          # Se elimina el 'command' y 'args' de 'sleep' para que el pod use el CMD del Dockerfile.
-          # Se elimina el 'securityContext' con 'runAsUser' porque el Dockerfile ya lo gestiona.
-
+          # ==== ¡ESTA ES LA CORRECCIÓN CLAVE! ====
+          # Se sobreescribe el comando de arranque para forzar el puerto de longpolling correcto.
+          # Esto tiene más prioridad que cualquier configuración en el Dockerfile o en odoo.conf.
+          command: ["bash", "-c"]
+          args:
+            - "odoo -c /etc/odoo/odoo.conf --gevent-port=8073 & jupyter lab --ip=0.0.0.0 --port=8888 --ServerApp.token=admin --notebook-dir=/opt/jupyter --no-browser"
+          
           ports:
-            - containerPort: 8069
-            - containerPort: 8888
-            - containerPort: 8072 
+            # Puertos que realmente se están usando. Se elimina el 8072 que causaba el conflicto.
+            - containerPort: 8069 # Odoo Web
+            - containerPort: 8888 # Jupyter Lab
+            - containerPort: 8073 # Odoo Longpolling
+          
           env:
             - name: HTTP_X_FORWARDED_PROTO
               value: "https"
