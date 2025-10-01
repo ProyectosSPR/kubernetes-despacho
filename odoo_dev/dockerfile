@@ -10,7 +10,6 @@ USER root
 
 # El usuario 'odoo' ya existe en la imagen base, así que lo modificamos para asegurar
 # que tenga un directorio home (-d) y un shell (-s).
-# Esto soluciona los errores de 'uid not found' y de permisos de Jupyter.
 RUN usermod -d /var/lib/odoo -s /bin/bash odoo
 
 # Se agrupan múltiples comandos en una sola capa (RUN) para optimizar la imagen
@@ -26,25 +25,28 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # ==== Parte 3: Configurar entorno de Jupyter ====
 # Script de arranque automático del entorno Odoo en Jupyter
-RUN echo "\
-import odoo\n\
-import builtins\n\
-odoo.cli.server.report_configuration = lambda _: None\n\
-odoo.tools.config.parse_config(['-c', '/etc/odoo/odoo.conf'])\n\
-from odoo.api import Environment\n\
-from odoo import SUPERUSER_ID\n\
-import psycopg2\n\
-db_name = odoo.tools.config['db_name']\n\
-if not db_name:\n\
-    print('⚠️ No hay base de datos configurada. Conéctate manualmente.')\n\
-else:\n\
-    registry = odoo.registry(db_name)\n\
-    cr = odoo.sql_db.db_connect(db_name).cursor()\n\
-    env = Environment(cr, SUPERUSER_ID, {})\n\
-    builtins.env = env\n\
-    builtins.cr = cr\n\
-    print(f'✅ Entorno Odoo listo en env (BD: {db_name})')\n\
-" > ${JUPYTER_HOME}/odoo_shell_init.py
+# ¡ESTA ES LA SECCIÓN CORREGIDA!
+# Se usa un "here document" (cat <<EOF) para escribir el archivo de forma limpia
+# y evitar problemas con caracteres especiales y saltos de línea.
+RUN cat <<EOF > ${JUPYTER_HOME}/odoo_shell_init.py
+import odoo
+import builtins
+odoo.cli.server.report_configuration = lambda _: None
+odoo.tools.config.parse_config(['-c', '/etc/odoo/odoo.conf'])
+from odoo.api import Environment
+from odoo import SUPERUSER_ID
+import psycopg2
+db_name = odoo.tools.config['db_name']
+if not db_name:
+    print(' No hay base de datos configurada. Conéctate manualmente.')
+else:
+    registry = odoo.registry(db_name)
+    cr = odoo.sql_db.db_connect(db_name).cursor()
+    env = Environment(cr, SUPERUSER_ID, {})
+    builtins.env = env
+    builtins.cr = cr
+    print(f'Entorno Odoo listo en env (BD: {db_name})')
+EOF
 
 # Celda automática para notebooks nuevos
 RUN mkdir -p ${JUPYTER_HOME}/.ipython/profile_default/startup
@@ -56,6 +58,6 @@ ENV IPYTHONDIR=${JUPYTER_HOME}/.ipython
 RUN chown -R odoo:root ${JUPYTER_HOME}
 
 # ==== Parte 4: Exponer puertos y configurar arranque ====
-EXPOSE 8069 8888
+EXPOSE 8069 8888 8072 8073
 USER odoo
 CMD ["bash", "-c", "odoo -c /etc/odoo/odoo.conf & jupyter lab --ip=0.0.0.0 --port=8888 --ServerApp.token=admin --notebook-dir=${JUPYTER_HOME} --no-browser"]

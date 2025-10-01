@@ -35,6 +35,11 @@ data:
         service: http://diseño.rml-medica.com:8069
         originRequest:
           httpHostHeader: diseño.rml-medica.com
+
+      - hostname: note.automateai.com.mx
+        service: http://note.automateai.com.mx:8069
+        originRequest:
+          httpHostHeader: note.automateai.com.mx
           
       
       - service: http_status:404
