@@ -57,6 +57,6 @@ ENV IPYTHONDIR=${JUPYTER_HOME}/.ipython
 RUN chown -R odoo:root ${JUPYTER_HOME}
 
 # ==== Parte 4: Exponer puertos y configurar arranque ====
-EXPOSE 8069 8888
+EXPOSE 8069 8888 8072 8073
 USER odoo
 CMD ["bash", "-c", "odoo -c /etc/odoo/odoo.conf & jupyter lab --ip=0.0.0.0 --port=8888 --ServerApp.token=admin --notebook-dir=${JUPYTER_HOME} --no-browser"]
