@@ -23,50 +23,78 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         git \
         python3-pip \
     && apt-get clean && rm -rf /var/lib/apt/lists/* \
-    # ==== ¡CAMBIO CLAVE! Instalamos las dependencias de Python ====
-    && pip install --no-cache-dir -r requirements.txt \
-    # Clonamos el repositorio DESPUÉS de instalar dependencias
+    # ==== ¡AQUÍ ESTÁ LA CORRECCIÓN! ====
+    # Añadimos --break-system-packages para permitir la instalación global con pip
+    && pip install --no-cache-dir --break-system-packages -r requirements.txt \
     && git clone --depth 1 https://github.com/ProyectosSPR/modulos_odoo18.git ${ODOO_EXTRA_ADDONS} \
     && mkdir -p ${JUPYTER_HOME} \
     && chown -R odoo:root ${ODOO_EXTRA_ADDONS} ${JUPYTER_HOME}
 
 # ===============================================
 # Parte 3: Configurar entorno de Jupyter
-# (Esta parte se mantiene igual)
 # ===============================================
-RUN echo "\
-import odoo\n\
-import builtins\n\
-odoo.cli.server.report_configuration = lambda _: None\n\
-odoo.tools.config.parse_config(['-c', '/etc/odoo/odoo.conf'])\n\
-from odoo.api import Environment\n\
-from odoo import SUPERUSER_ID\n\
-import psycopg2\n\
-db_name = odoo.tools.config['db_name']\n\
-if not db_name:\n\
-    print('No hay base de datos configurada. Conéctate manualmente.')\n\
-else:\n\
-    registry = odoo.registry(db_name)\n\
-    cr = odoo.sql_db.db_connect(db_name).cursor()\n\
-    env = Environment(cr, SUPERUSER_ID, {})\n\
-    builtins.env = env\n\
-    builtins.cr = cr\n\
-    print(f'Entorno Odoo listo en env (BD: {db_name})')\n\
-" > ${JUPYTER_HOME}/odoo_shell_init.py
+# Script de inicialización para cargar el entorno de Odoo en Jupyter
+RUN cat <<'EOF' > ${JUPYTER_HOME}/odoo_shell_init.py
+import odoo
+import builtins
+import configparser
+import logging
 
+_logger = logging.getLogger(__name__)
+
+# --- MÉTODO FINAL Y ROBUSTO ---
+
+config = configparser.ConfigParser()
+config.read('/etc/odoo/odoo.conf')
+db_name = config.get('options', 'db_name', fallback=None)
+
+# Limpiamos las variables por si el script falla
+builtins.env = None
+builtins.cr = None
+
+if not db_name:
+    print('❌ No se encontró db_name en /etc/odoo/odoo.conf. No se pudo inicializar el entorno de Odoo.')
+else:
+    try:
+        registry = odoo.modules.registry.Registry.new(db_name)
+        
+        # ==== ¡AQUÍ ESTÁ LA CORRECCIÓN CLAVE! ====
+        # Creamos el cursor SIN un bloque 'with' para que no se cierre automáticamente.
+        cr = registry.cursor()
+        
+        # Creamos el entorno con el cursor que permanecerá abierto.
+        env = odoo.api.Environment(cr, odoo.SUPERUSER_ID, {})
+        
+        # Hacemos que 'env' y 'cr' estén disponibles globalmente en Jupyter.
+        builtins.env = env
+        builtins.cr = cr
+        
+        print(f'✅ Entorno Odoo listo. Usa la variable global `env` (BD: {db_name})')
+
+    except Exception as e:
+        _logger.error("Error al inicializar el entorno de Odoo: %s", e)
+        print(f"❌ Error al inicializar el entorno de Odoo: {e}")
+        # Si falla, cerramos el cursor que abrimos manualmente.
+        if 'cr' in locals() and cr:
+            cr.close()
+EOF
+
+# Celda automática para notebooks nuevos
 RUN mkdir -p ${JUPYTER_HOME}/.ipython/profile_default/startup
 RUN echo "exec(open('${JUPYTER_HOME}/odoo_shell_init.py').read())" \
     > ${JUPYTER_HOME}/.ipython/profile_default/startup/00-odoo-shell.py
 
+# Asegurar que IPython use el perfil creado y los permisos sean correctos
 ENV IPYTHONDIR=${JUPYTER_HOME}/.ipython
 RUN chown -R odoo:root ${JUPYTER_HOME}
 
-# ===============================================
+
+    # ===============================================
 # Parte 4: Exponer puertos y configurar arranque
 # ===============================================
 EXPOSE 8069 8888 8072 8073
 
 USER odoo
 
-# El comando de arranque se mantiene igual
+# Comando de arranque para iniciar Odoo y Jupyter Lab en paralelo
 CMD ["bash", "-c", "odoo -c /etc/odoo/odoo.conf & jupyter lab --ip=0.0.0.0 --port=8888 --ServerApp.token=admin --notebook-dir=${JUPYTER_HOME} --no-browser"]
