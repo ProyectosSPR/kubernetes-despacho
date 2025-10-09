@@ -40,6 +40,10 @@ data:
         service: http://note.automateai.com.mx:8069
         originRequest:
           httpHostHeader: note.automateai.com.mx
-          
+
+      - hostname: tcp.automateai.com.mx
+        service: http://tcp.automateai.com.mx:5432
+        originRequest:
+          httpHostHeader: tcp.automateai.com.mx    
       
       - service: http_status:404
