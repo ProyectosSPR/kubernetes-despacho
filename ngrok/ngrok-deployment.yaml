@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ngrok-postgres
+  labels:
+    app: ngrok-postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ngrok-postgres
+  template:
+    metadata:
+      labels:
+        app: ngrok-postgres
+    spec:
+      containers:
+      - name: ngrok
+        image: ngrok/ngrok:latest
+        env:
+        - name: NGROK_AUTHTOKEN
+          valueFrom:
+            secretKeyRef:
+              name: ngrok-secret
+              key: authtoken
+        - name: NGROK_LOG
+          value: stdout
+        command:
+          - "ngrok"
+          - "tcp"
+          - "postgres:5432"
