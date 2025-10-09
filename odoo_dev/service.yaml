@@ -11,15 +11,11 @@ spec:
       port: 8069 
       targetPort: 8069
     - protocol: TCP
-      name: longpolling
-      port: 8072
-      targetPort: 8072
-    - protocol: TCP
       name: jupyter
       port: 8888
       targetPort: 8888
     - protocol: TCP
-      name: longpolling2
+      name: longpolling
       port: 8073
       targetPort: 8073
   type: ClusterIP
