@@ -64,7 +64,7 @@ spec:
         - name: N8N_PROTOCOL
           value: "http"  # Cambiado a HTTP
         - name: WEBHOOK_URL
-          value: "http://n8n.automateai.com.mx:5678"  # HTTP con puerto
+          value: "http://aut.automateai.com.mx:5678"  # HTTP con puerto
         - name: GENERIC_TIMEZONE
           value: "America/Mexico_City"
         

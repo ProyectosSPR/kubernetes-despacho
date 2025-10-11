@@ -39,6 +39,8 @@ sudo modprobe br_netfilter
 # Configurar para que persistan tras reinicios
 cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf
 overlay
+
+
 br_netfilter
 EOF
 
@@ -97,10 +99,10 @@ Bash
 sudo apt-get install -y apt-transport-https ca-certificates gpg
 
 # Añadir la clave GPG del repositorio de Kubernetes
-curl -fsSL [https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key](https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key) | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 
 # Añadir el repositorio de Kubernetes
-echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] [https://pkgs.k8s.io/core:/stable:/v1.30/deb/](https://pkgs.k8s.io/core:/stable:/v1.30/deb/) /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.30/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
 
 # Instalar las herramientas
 sudo apt-get update
@@ -132,7 +134,7 @@ Solución: Instalar un CNI. En nuestro caso, elegimos Calico.
 
 Bash
 
-kubectl apply -f [https://raw.githubusercontent.com/projectcalico/calico/v3.28.0/manifests/calico.yaml](https://raw.githubusercontent.com/projectcalico/calico/v3.28.0/manifests/calico.yaml)
+kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.28.0/manifests/calico.yaml
 4.3 Error: Pods de Calico en estado Init o Pending
 Después de instalar Calico, sus propios pods no se iniciaban correctamente.
 
