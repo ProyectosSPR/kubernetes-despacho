@@ -37,4 +37,5 @@ data:
     gevent-port = 8073  
     limit_time_real_cron = 600
     secure_cookie_httponly = True
+    timezone = America/Mexico_City
     
