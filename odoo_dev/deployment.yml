@@ -33,7 +33,7 @@ spec:
         # Contenedor 1: Odoo (Servicio Principal)
         # ===============================================
         - name: odoo18
-          image: proyectosspr/odoo_18_git:4.2
+          image: proyectosspr/odoo_18_git:4.3
           imagePullPolicy: Always
           
           # Comando limpio para iniciar solo Odoo, usando el archivo de configuración
@@ -79,7 +79,7 @@ spec:
         # ===============================================
         - name: jupyter
           # Usa la misma imagen, ya que contiene todo lo necesario
-          image: proyectosspr/odoo_18_git:4.2
+          image: proyectosspr/odoo_18_git:4.3
           imagePullPolicy: Always
           
           # Comando limpio para iniciar solo Jupyter Lab
