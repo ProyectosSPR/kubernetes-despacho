@@ -32,7 +32,7 @@ data:
     log_level = debug
     logfile = False
     proxy_mode = True
-    longpolling_port = 8072
+    longpolling_port = false
     server_wide_modules = web,base
     workers = 2
     limit_time_real_cron = 600
