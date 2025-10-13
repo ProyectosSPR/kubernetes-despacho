@@ -32,9 +32,9 @@ data:
     log_level = debug
     logfile = False
     proxy_mode = True
+    longpolling_port = 8072
     server_wide_modules = web,base
     workers = 2
-    gevent-port = 8073  
     limit_time_real_cron = 600
     secure_cookie_httponly = True
     

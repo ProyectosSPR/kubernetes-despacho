@@ -35,23 +35,25 @@ spec:
           # Esto tiene más prioridad que cualquier configuración en el Dockerfile o en odoo.conf.
           command: ["bash", "-c"]
           args:
-            - "odoo -c /etc/odoo/odoo.conf --gevent-port=8073 & jupyter lab --ip=0.0.0.0 --port=8888 --ServerApp.token=admin --notebook-dir=/opt/jupyter --no-browser"
+            - "odoo -c /etc/odoo/odoo.conf & jupyter lab --ip=0.0.0.0 --port=8888 --ServerApp.token=admin --notebook-dir=/opt/jupyter --no-browser"
           
           ports:
             # Puertos que realmente se están usando. Se elimina el 8072 que causaba el conflicto.
             - containerPort: 8069 # Odoo Web
             - containerPort: 8888 # Jupyter Lab
-            - containerPort: 8073 # Odoo Longpolling
+            - containerPort: 8072 # <--- CORRIGE ESTE PUERTO
+              name: longpolling # Odoo Longpolling
+              
           
           env:
             - name: HTTP_X_FORWARDED_PROTO
               value: "https"
             - name: HTTP_X_FORWARDED_HOST
-              value: "odoo.automateai.com.mx"
+              value: "automateai.com.mx"
             - name: HTTP_X_FORWARDED_PORT
               value: "443"
             - name: HOST
-              value: "odoo.automateai.com.mx"
+              value: "automateai.com.mx"
           
           volumeMounts:
             - name: odoo-data18
