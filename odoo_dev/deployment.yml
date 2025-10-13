@@ -27,7 +27,7 @@ spec:
 
       containers:
         - name: odoo18
-          image: proyectosspr/odoo_18_git:4.0
+          image: proyectosspr/odoo_18_git:4.2
           imagePullPolicy: Always 
           
           # ==== ¡ESTA ES LA CORRECCIÓN CLAVE! ====
