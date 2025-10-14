@@ -23,7 +23,7 @@ spec:
           env:
             # Configuración básica
             - name: SERVER_URL
-              value: "https://evo.automateai.com.mx"
+              value: "https://evolution.automateai.com.mx"
             - name: PORT
               value: "8080"
             

@@ -25,16 +25,16 @@ data:
   
   # Server configuration
   SERVER_PORT: "8080"
-  SERVER_URL: "https://evo.automateai.com.mx"
+  SERVER_URL: "https://evolution.automateai.com.mx"
   
   # Webhook configuration
-  WEBHOOK_BASE: "https://evo.automateai.com.mx"
+  WEBHOOK_BASE: "https://evolution.automateai.com.mx"
   
   # Static files configuration
-  MANAGER_URL: "https://evo.automateai.com.mx/manager"
+  MANAGER_URL: "https://evolution.automateai.com.mx/manager"
   
   # WhatsApp configuration
-  CONFIG_SESSION_PHONE_VERSION: "2.3000.1023204200"
+  CONFIG_SESSION_PHONE_VERSION: "2.3000.1028340218"
   
   # Logs
   LOG_LEVEL: "ERROR,WARN,DEBUG,INFO,LOG,VERBOSE,DARK,WEBHOOKS"
