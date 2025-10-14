@@ -12,11 +12,8 @@ spec:
       labels:
         app: odoo18
     spec:
-      # Contexto de seguridad para que los volúmenes pertenezcan al grupo del usuario odoo (101)
       securityContext:
         fsGroup: 101
-
-      # Contenedor de inicialización para arreglar permisos ANTES de que los contenedores principales arranquen
       initContainers:
       - name: fix-permissions
         image: busybox:latest
@@ -26,27 +23,23 @@ spec:
             mountPath: /var/lib/odoo
           - name: odoo-extra-addons18
             mountPath: /mnt/extra-addons
-
-      # --- Definición de los dos contenedores que correrán en el mismo Pod ---
       containers:
-        # ===============================================
-        # Contenedor 1: Odoo (Servicio Principal)
-        # ===============================================
+        # --- Contenedor 1: Odoo ---
+        # Este contenedor ejecuta Odoo como el proceso principal, que es la forma correcta.
         - name: odoo18
-          image: proyectosspr/odoo_18_git:4.3
+          image: proyectosspr/odoo_18_git:4.3 # Usa tu imagen con las herramientas
           imagePullPolicy: Always
-          
-          # Comando limpio para iniciar solo Odoo, usando el archivo de configuración
+          # ==== ¡ESTE ES EL CAMBIO MÁS IMPORTANTE! ====
+          # Anulamos completamente el CMD del Dockerfile y le damos a Odoo el control.
           command: ["/usr/bin/odoo"]
           args:
             - "--config=/etc/odoo/odoo.conf"
-          
           ports:
             - containerPort: 8069
               name: http
             - containerPort: 8072
               name: longpolling
-          
+          # ... tu 'env', 'volumeMounts', y 'resources' van aquí, sin cambios ...
           env:
             - name: HTTP_X_FORWARDED_PROTO
               value: "https"
@@ -56,7 +49,6 @@ spec:
               value: "443"
             - name: HOST
               value: "automateai.com.mx"
-          
           volumeMounts:
             - name: odoo-data18
               mountPath: /var/lib/odoo
@@ -65,7 +57,6 @@ spec:
               readOnly: true
             - name: odoo-extra-addons18
               mountPath: /mnt/extra-addons
-          
           resources:
             requests:
               memory: "4Gi"
@@ -74,29 +65,21 @@ spec:
               memory: "6Gi"
               cpu: "4"
 
-        # ===============================================
-        # Contenedor 2: Jupyter Lab (Herramienta de desarrollo)
-        # ===============================================
+        # --- Contenedor 2: Jupyter ---
         - name: jupyter
-          # Usa la misma imagen, ya que contiene todo lo necesario
           image: proyectosspr/odoo_18_git:4.3
           imagePullPolicy: Always
-          
-          # Comando limpio para iniciar solo Jupyter Lab
           command: ["jupyter", "lab"]
           args:
             - "--ip=0.0.0.0"
             - "--port=8888"
             - "--ServerApp.token=admin"
-            - "--notebook-dir=/mnt/extra-addons" # Inicia en la carpeta de addons para fácil acceso
+            - "--notebook-dir=/mnt/extra-addons"
             - "--no-browser"
-            - "--allow-root" # A menudo necesario para que Jupyter corra en contenedores
-          
+            - "--allow-root"
           ports:
             - containerPort: 8888
               name: jupyter
-          
-          # Monta los mismos volúmenes para que Jupyter pueda "ver" el entorno de Odoo
           volumeMounts:
             - name: odoo-data18
               mountPath: /var/lib/odoo
@@ -105,8 +88,6 @@ spec:
               readOnly: true
             - name: odoo-extra-addons18
               mountPath: /mnt/extra-addons
-
-      # --- Definición de los volúmenes compartidos por ambos contenedores ---
       volumes:
         - name: odoo-data18
           persistentVolumeClaim:

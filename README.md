@@ -35,3 +35,17 @@ python odoo-bin -r odoo -w odoo --addons-path=addons -d mydb -i base --without-d
 ----------postgres
 kubectl port-forward service/postgres 5432:5432
 
+
+
+configuracion de proxy manager para websockets
+location /websocket {
+    proxy_pass http://odoo18:8072;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+    proxy_read_timeout 3600s;
+}
+
+location / {
+    proxy_pass http://odoo18.default.svc.cluster.local:8069;
+}
