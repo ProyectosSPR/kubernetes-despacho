@@ -20,86 +20,17 @@ spec:
           ports:
             - containerPort: 8080
               name: http
-          env:
-            # Configuración básica
-            - name: SERVER_URL
-              value: "https://evolution.automateai.com.mx"
-            - name: PORT
-              value: "8080"
-            
-            # CORS Configuration
-            - name: CORS_ORIGIN
-              value: "*"
-            - name: CORS_METHODS
-              value: "POST,GET,PUT,DELETE,PATCH,OPTIONS"
-            - name: CORS_CREDENTIALS
-              value: "true"
-            
-            # Base de datos
-            - name: DATABASE_ENABLED
-              value: "true"
-            - name: DATABASE_PROVIDER
-              value: "postgresql"
-            - name: DATABASE_CONNECTION_URI
-              valueFrom:
-                secretKeyRef:
-                  name: evolution-secrets
-                  key: DATABASE_CONNECTION_URI
-            
-            # Redis
-            - name: REDIS_ENABLED
-              value: "true"
-            - name: CACHE_REDIS_URI
-              valueFrom:
-                secretKeyRef:
-                  name: evolution-secrets
-                  key: CACHE_REDIS_URI
-            
-            # *** CONFIGURACIÓN DE AUTENTICACIÓN ***
-            # API sigue con autenticación para proteger endpoints
-            - name: AUTHENTICATION_TYPE
-              value: "apikey"
-            - name: AUTHENTICATION_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: evolution-secrets
-                  key: AUTHENTICATION_API_KEY
-            
-            # *** CONFIGURACIÓN ESPECÍFICA DEL MANAGER ***
-            - name: MANAGER_ENABLED
-              value: "true"
-            - name: MANAGER_HOST
-              value: "0.0.0.0"
-            - name: MANAGER_PORT
-              value: "8080"
-            
-            # Autenticación del Manager (separada de la API)
-            - name: MANAGER_AUTH_ENABLED
-              value: "true"
-            - name: MANAGER_AUTH_TYPE
-              value: "basic"  # o "jwt"
-            - name: MANAGER_USERNAME
-              value: "admin"
-            - name: MANAGER_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: evolution-secrets
-                  key: MANAGER_PASSWORD
-            
+          
+          # --- ¡CORRECCIÓN CLAVE! ---
+          # Se elimina la sección 'env' y se reemplaza con 'envFrom'.
+          # Esto carga TODAS las variables desde tus archivos de ConfigMap y Secret,
+          # haciendo la configuración mucho más limpia y fácil de gestionar.
+          envFrom:
+            - configMapRef:
+                name: evolution-config
+            - secretRef:
+                name: evolution-secrets
 
-            
-            # Configuración de logs
-            - name: LOG_LEVEL
-              value: "INFO"
-            
-           # *** CONFIGURACIÓN CRÍTICA PARA QR CODE ***
-            - name: CONFIG_SESSION_PHONE_CLIENT
-              value: "Evolution API"
-            - name: CONFIG_SESSION_PHONE_NAME
-              value: "Chrome"
-            - name: CONFIG_SESSION_PHONE_VERSION
-              value: "2.3000.1023204200" 
-            
           resources:
             requests:
               memory: "256Mi"
@@ -126,4 +57,9 @@ spec:
             timeoutSeconds: 5
             failureThreshold: 5
 
-
+      # --- Esta sección no estaba en tu archivo original pero es necesaria ---
+      # Asocia el PersistentVolumeClaim que creaste para guardar las instancias.
+      volumes:
+        - name: evolution-instances
+          persistentVolumeClaim:
+            claimName: evolution-instances-pvc
