@@ -50,12 +50,12 @@ spec:
             - name: HOST
               value: "automateai.com.mx"
           volumeMounts:
-            - name: odoo-data18
+            - name: odoo-data16
               mountPath: /var/lib/odoo
-            - name: config-volume18
+            - name: config-volume16
               mountPath: /etc/odoo
               readOnly: true
-            - name: odoo-extra-addons18
+            - name: odoo-extra-addons16
               mountPath: /mnt/extra-addons
           resources:
             requests:
@@ -81,23 +81,23 @@ spec:
             - containerPort: 8888
               name: jupyter
           volumeMounts:
-            - name: odoo-data18
+            - name: odoo-data16
               mountPath: /var/lib/odoo
-            - name: config-volume18
+            - name: config-volume16
               mountPath: /etc/odoo
               readOnly: true
-            - name: odoo-extra-addons18
+            - name: odoo-extra-addons16
               mountPath: /mnt/extra-addons
       volumes:
-        - name: odoo-data18
+        - name: odoo-data16
           persistentVolumeClaim:
-            claimName: odoo-data18
-        - name: config-volume18
+            claimName: odoo-data16
+        - name: config-volume16
           configMap:
-            name: odoo-config18
+            name: odoo-config16
             items:
               - key: odoo.conf
                 path: odoo.conf
-        - name: odoo-extra-addons18
+        - name: odoo-extra-addons16
           persistentVolumeClaim:
-            claimName: odoo-extra-addons18
+            claimName: odoo-extra-addons16
