@@ -30,16 +30,20 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         curl \
         iputils-ping \
         nano \
+        # ==== ¡AQUÍ ESTÁ LA CORRECCIÓN! ====
+        # Dependencias necesarias para compilar python-ldap
+        build-essential \
+        python3-dev \
+        libldap2-dev \
+        libsasl2-dev \
     && apt-get clean && rm -rf /var/lib/apt/lists/* \
-    # ==== ¡AQUÍ ESTÁ LA CORRECCIÓN! ====
-    # 1. Actualizamos pip a la última versión para que reconozca --break-system-packages
+    # 1. Actualizamos pip a la última versión
     && python3 -m pip install --upgrade pip \
-    # 2. Ahora sí, instalamos los requerimientos con la opción necesaria
-    && pip install --no-cache-dir --break-system-packages -r requirements.txt \
+    # 2. Ahora instalamos los requerimientos (CON LA CORRECCIÓN)
+    && pip install --no-cache-dir --ignore-installed --break-system-packages -r requirements.txt \
     && git clone --depth 1 https://github.com/ProyectosSPR/modulos_odoo18.git ${ODOO_EXTRA_ADDONS} \
     && mkdir -p ${JUPYTER_HOME} \
     && chown -R odoo:root ${ODOO_EXTRA_ADDONS} ${JUPYTER_HOME}
-
 # ===============================================
 # Parte 3: Configurar entorno de Jupyter
 # ===============================================
