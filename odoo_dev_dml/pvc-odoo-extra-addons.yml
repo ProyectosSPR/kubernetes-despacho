@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: odoo-extra-addons
+  name: odoo-extra-addons16
 spec:
   accessModes:
     - ReadWriteOnce
