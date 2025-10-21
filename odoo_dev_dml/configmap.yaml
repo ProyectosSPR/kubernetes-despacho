@@ -16,7 +16,7 @@ data:
     db_sslmode = prefer
     db_template = template1
     db_user = dml
-    db_name = odoo16
+    db_name = dml
     db_password = Sergio55
     demo = {}
     email_from = proyectos_spr@outlook.com

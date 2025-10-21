@@ -26,7 +26,7 @@ odoo -d odoo17 -u licencias\_modulo --without-demo=all --xmlrpc-port=8067 --stop
 Facturacion CFDI
 odoo -d odoo18 --xmlrpc-port=8067 --init=
 
-
+pip install pytesseract --break-system-packages
 
 python odoo-bin -r odoo -w odoo --addons-path=addons -d mydb -i base --without-demo=all
 
