@@ -1,4 +1,0 @@
-kubectl run ngrok-exposer --image=ngrok/ngrok:latest --rm -it --restart=Never \
-  --env="NGROK_AUTHTOKEN=2z47BSXlREFAEcJa7VrQi6Oe5oV_66Wr84AdPLVxBnqE5ZWLZ" \
-  -- \
-  tcp //postgres:5432
