@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: flask-app
-        image: portal-facturacion:latest
+        image: proyectosspr/portal-facturacion:latest
         imagePullPolicy: IfNotPresent  # Cambiar a Always si usas registry
         ports:
         - containerPort: 5000
