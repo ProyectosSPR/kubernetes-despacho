@@ -22,7 +22,7 @@ RUN usermod -d /var/lib/odoo -s /bin/bash odoo
 # Copiamos el archivo de dependencias ANTES de instalar para aprovechar el cache
 COPY requirements.txt .
 
-# Se agrupan múltiples comandos en una sola capa (RUN) para optimizar la imagen
+# Se agrupan m�ltiples comandos en una sola capa (RUN) para optimizar la imagen
 RUN apt-get update && apt-get install -y --no-install-recommends \
         git \
         python3-pip \
@@ -31,7 +31,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         python3-dev \
         libldap2-dev \
         libsasl2-dev \
-        # --- Herramientas de diagnóstico ---
+        # --- Herramientas de diagn�stico ---
         net-tools \
         procps \
         dnsutils \
@@ -44,11 +44,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     # 2. Instalamos los requerimientos.
     #    Usamos --no-cache-dir para ahorrar espacio
     #    Usamos --break-system-packages (requerido en Debian 12+)
-    #    Esto SOBREESCRIBIRÁ las versiones del 'odoo:16' base
+    #    Esto SOBREESCRIBIR� las versiones del 'odoo:16' base
     #    con las versiones exactas de nuestro requirements.txt
-    && pip install --no-cache-dir --break-system-packages -r requirements.txt \
-    # 3. Clonamos los módulos (¡Asegúrate que este repo sea para Odoo 16!)
-    && git clone --depth 1 https://github.com/ProyectosSPR/modulos_odoo18.git ${ODOO_EXTRA_ADDONS} \
+    && pip install --no-cache-dir --ignore-installed --break-system-packages -r requirements.txt \
+    # 3. Clonamos los m�dulos (�Aseg�rate que este repo sea para Odoo 16!)
+    && git clone --depth 1 https://github.com/ProyectosSPR/modulos_odoo.git ${ODOO_EXTRA_ADDONS} \
     # 4. Creamos y damos permisos a las carpetas
     && mkdir -p ${JUPYTER_HOME} \
     && chown -R odoo:root ${ODOO_EXTRA_ADDONS} ${JUPYTER_HOME}
