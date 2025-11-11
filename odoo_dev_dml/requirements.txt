@@ -26,7 +26,7 @@ gevent==23.9.1
 greenlet==3.0.3
 idna==3.7
 libsass==0.22.0
-lxml==5.2.2
+lxml==4.9.4
 num2words==0.5.13
 ofxparse==0.21
 passlib==1.7.4
