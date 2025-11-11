@@ -69,7 +69,7 @@ spec:
 
         # --- Contenedor 2: Jupyter ---
         - name: jupyter
-          image: proyectosspr/odoo_16_git:1.3
+          image: proyectosspr/odoo_16_git:1.5
           imagePullPolicy: Always
           command: ["jupyter", "lab"]
           args:
