@@ -10,7 +10,7 @@ data:
   UPLOAD_FOLDER: "/app/uploads"
 
   # PostgreSQL - Host y puerto (no sensibles)
-  POSTGRES_HOST: "10.107.55.29"
+  POSTGRES_HOST: "postgres"
   POSTGRES_PORT: "5432"
   POSTGRES_DB: "mercadoLibre"
   POSTGRES_USER: "dml"

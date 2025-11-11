@@ -6,7 +6,7 @@ metadata:
   labels:
     app: portal-facturacion
 spec:
-  replicas: 2  # Escala horizontal
+  replicas: 1  # Escala horizontal
   selector:
     matchLabels:
       app: portal-facturacion
@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: flask-app
-        image: proyectosspr/portal-facturacion:latest
+        image: proyectosspr/portal-facturacion:1.0
         imagePullPolicy: IfNotPresent  # Cambiar a Always si usas registry
         ports:
         - containerPort: 5000

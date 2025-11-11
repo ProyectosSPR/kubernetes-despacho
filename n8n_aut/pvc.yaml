@@ -1,0 +1,13 @@
+# PersistentVolumeClaim para datos de n8n automateai
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: n8n-automateai-data-pvc
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  #storageClassName: do-block-storage

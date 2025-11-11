@@ -1,0 +1,11 @@
+# ConfigMap para la configuración de n8n automateai
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: n8n-automateai-config
+  namespace: default
+data:
+  config: |
+    {
+      "encryptionKey": "vySGs7SRi+/Kh7QO8Q+JekO+OtC4gTnq"
+    }

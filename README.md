@@ -17,7 +17,7 @@ odoo -d tu\_base\_de\_datos -i base --without-demo=all --http-port=8067 --stop-a
 odoo -i base --without-demo=all --xmlrpc-port=8067 --stop-after-init
 
 odoo -c /etc/odoo/odoo.conf --xmlrpc-port=8067
-odoo -i base --xmlrpc-port=8067 --stop-after-init --database=odoo17
+odoo -i base --xmlrpc-port=8067 --stop-after-init --database=dml
 odoo -d odoo17 -u n8n-sales --without-demo=all --xmlrpc-port=8067 --stop-after-init
 
 odoo -d odoo17 -u saa\_s\_\_access\_management --without-demo=all --xmlrpc-port=8067 --stop-after-init

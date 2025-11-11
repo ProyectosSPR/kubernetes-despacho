@@ -16,7 +16,8 @@ data:
     db_sslmode = prefer
     db_template = template1
     db_user = dml
-    db_name = dml
+    db_name = dml-medica
+    dbfilter = .*(odoo|dml).*
     db_password = Sergio55
     demo = {}
     email_from = proyectos_spr@outlook.com
@@ -36,8 +37,8 @@ data:
     limit_memory_hard = 2684354560
     limit_memory_soft = 2147483648
     limit_request = 8192
-    limit_time_cpu = 120
-    limit_time_real = 300
+    limit_time_cpu = 7200
+    limit_time_real = 7200
     limit_time_real_cron = 600
     
     # Proxy y seguridad - CRÍTICO PARA WEBSOCKET

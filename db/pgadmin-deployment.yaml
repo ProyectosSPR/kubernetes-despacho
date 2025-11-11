@@ -2,6 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: pgadmin
+  labels:
+    app: pgadmin
 spec:
   replicas: 1
   selector:
@@ -16,10 +18,11 @@ spec:
         fsGroup: 5050
       containers:
         - name: pgadmin
-          image: dpage/pgadmin4
+          image: dpage/pgadmin4:latest
           ports:
             - containerPort: 80
           env:
+            # --- Credenciales desde Secret ---
             - name: PGADMIN_DEFAULT_EMAIL
               valueFrom:
                 secretKeyRef:
@@ -30,14 +33,33 @@ spec:
                 secretKeyRef:
                   name: pgadmin-secret
                   key: PGADMIN_DEFAULT_PASSWORD
+
+            # --- Configuración principal ---
             - name: PGADMIN_CONFIG_SERVER_MODE
               value: "True"
+
+            # --- Soporte para proxy inverso (Nginx Proxy Manager / HTTPS) ---
+            - name: PGADMIN_CONFIG_PROXY_X_HEADERS
+              value: "True"
+            - name: PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION
+              value: "False"
+            - name: PGADMIN_CONFIG_ALLOW_REMOTE_USER
+              value: "True"
+
+            # --- Cookies seguras para HTTPS ---
+            - name: PGADMIN_CONFIG_COOKIE_SAMESITE
+              value: "None"
+            - name: PGADMIN_CONFIG_COOKIE_SECURE
+              value: "True"
+
           securityContext:
             runAsUser: 5050
             runAsGroup: 5050
+
           volumeMounts:
             - name: pgadmin-storage
               mountPath: /var/lib/pgadmin
+
       volumes:
         - name: pgadmin-storage
           persistentVolumeClaim:

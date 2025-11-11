@@ -669,6 +669,9 @@ spec:
         - name: rootfs
           mountPath: /rootfs
           readOnly: true
+        - name: udev
+          mountPath: /run/udev/data
+          readOnly: true  
         resources:
           requests:
             cpu: 50m
@@ -686,6 +689,9 @@ spec:
       - name: rootfs
         hostPath:
           path: /
+      - name: udev
+        hostPath:
+          path: /run/udev/data    
       tolerations:
         - key: node-role.kubernetes.io/master
           effect: NoSchedule

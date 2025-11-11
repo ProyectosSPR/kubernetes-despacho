@@ -2,8 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ngrok-postgres
-  labels:
-    app: ngrok-postgres
 spec:
   replicas: 1
   selector:
@@ -16,16 +14,17 @@ spec:
     spec:
       containers:
       - name: ngrok
-        image: ngrok/ngrok:latest
+        image: ngrok/ngrok:alpine
         env:
         - name: NGROK_AUTHTOKEN
           valueFrom:
             secretKeyRef:
               name: ngrok-secret
               key: authtoken
-        - name: NGROK_LOG
-          value: stdout
-        command:
-          - "ngrok"
+        args:
           - "tcp"
-          - "postgres:5432"
+          - "--log=stdout"
+          - "postgres.default.svc.cluster.local:5432"
+        ports:
+        - containerPort: 4040
+          name: dashboard
