@@ -47,10 +47,15 @@ data:
         originRequest:
           httpHostHeader: pgadmin.automateai.com.mx
           
-      - hostname: dml.automateai.com.mx
-        service: http://dml.automateai.com.mx:8086
+      - hostname: rml-medica.com
+        service: http://rml-medica.com:8089
         originRequest:
-          httpHostHeader: dml.automateai.com.mx
+          httpHostHeader: rml-medica.com
+      
+      - hostname: jupyter.rml-medica.com
+        service: http://jupyter.rml-medica.com:8888
+        originRequest:
+          httpHostHeader: jupyter.rml-medica.com
           
       
       - service: http_status:404

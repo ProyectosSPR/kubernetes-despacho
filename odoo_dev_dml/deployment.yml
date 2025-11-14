@@ -12,8 +12,11 @@ spec:
       labels:
         app: odoo16
     spec:
+      # El fsGroup es una buena práctica
       securityContext:
         fsGroup: 101
+      
+      # Tu initContainer está perfecto. Arregla la propiedad de los volúmenes.
       initContainers:
       - name: fix-permissions
         image: busybox:latest
@@ -23,25 +26,29 @@ spec:
             mountPath: /var/lib/odoo
           - name: odoo-extra-addons16
             mountPath: /mnt/extra-addons
+      
       containers:
         # --- Contenedor 1: Odoo ---
-        # Este contenedor ejecuta Odoo como el proceso principal, que es la forma correcta.
         - name: odoo16
-          image: proyectosspr/odoo_16_git:1.6 # Usa tu imagen con las herramientas
+          image: proyectosspr/odoo_16_git:1.6
           imagePullPolicy: Always
-          # ==== ¡ESTE ES EL CAMBIO MÁS IMPORTANTE! ====
-          # Anulamos completamente el CMD del Dockerfile y le damos a Odoo el control.
           command: ["/usr/bin/odoo"]
           args:
             - "--config=/etc/odoo/odoo.conf"
             - "--limit-time-cpu=8200"
             - "--limit-time-real=8200"
+          
+          # --- MEJORA 1: Contexto de Seguridad ---
+          # Forzamos al contenedor a correr como el usuario 'odoo' (101)
+          securityContext:
+            runAsUser: 101
+            runAsGroup: 101
+
           ports:
             - containerPort: 8069
               name: http
             - containerPort: 8072
               name: longpolling
-          # ... tu 'env', 'volumeMounts', y 'resources' van aquí, sin cambios ...
           env:
             - name: HTTP_X_FORWARDED_PROTO
               value: "https"
@@ -61,11 +68,11 @@ spec:
               mountPath: /mnt/extra-addons
           resources:
             requests:
-              memory: "4Gi"
-              cpu: "3"
+              memory: "16Gi"
+              cpu: "12"
             limits:
-              memory: "6Gi"
-              cpu: "4"
+              memory: "19Gi"
+              cpu: "20"
 
         # --- Contenedor 2: Jupyter ---
         - name: jupyter
@@ -78,7 +85,14 @@ spec:
             - "--ServerApp.token=admin"
             - "--notebook-dir=/mnt/extra-addons"
             - "--no-browser"
-            - "--allow-root"
+            # --- MEJORA 2: Se elimina '--allow-root' ---
+            # Ya no es necesario porque forzamos al usuario 101
+          
+          # --- MEJORA 1 (Repetida): Contexto de Seguridad ---
+          securityContext:
+            runAsUser: 101
+            runAsGroup: 101
+
           ports:
             - containerPort: 8888
               name: jupyter
@@ -90,6 +104,7 @@ spec:
               readOnly: true
             - name: odoo-extra-addons16
               mountPath: /mnt/extra-addons
+      
       volumes:
         - name: odoo-data16
           persistentVolumeClaim:

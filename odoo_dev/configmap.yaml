@@ -41,8 +41,8 @@ data:
     limit_time_real_cron = 600
     
     # Proxy y seguridad - CRÍTICO PARA WEBSOCKET
-    proxy_mode = True
-    secure_cookie_httponly = True
+    proxy_mode = true
+    secure_cookie_httponly = true
     
     # Database settings
     list_db = True
