@@ -16,45 +16,45 @@ data:
     db_sslmode = prefer
     db_template = template1
     db_user = dml
-    db_name = odoo16-test
-  
+    db_name = odoo16c
+
     db_password = Sergio55
     demo = {}
     email_from = proyectos_spr@outlook.com
-    
+
     # Configuración HTTP principal
     http_interface = 0.0.0.0
     http_port = 8069
-    
+
     # Configuración de longpolling (Odoo 18 early versions)
     gevent_port = 8072
-    
+
     # Workers configuration
     workers = 0
     max_cron_threads = 1
-    
+
     # Limites de recursos
-    limit_memory_hard = 8589934592
-    limit_memory_soft = 6442450944
-    limit_request = 52428800
+    limit_memory_hard = 0
+    limit_memory_soft = 0
+
     limit_time_cpu = 8200
     limit_time_real = 8200
     limit_time_real_cron = 8200
-    limit_request = 819200000
-    
+    limit_request = 8192000000
+
     # Proxy y seguridad - CRÍTICO PARA WEBSOCKET
     #proxy_mode = True
     #secure_cookie_httponly = True
-    
+
     # Database settings
     list_db = True
     log_db = True
     log_db_level = warning
     log_level = info
     logfile = False
-    
+
     # Modules
     server_wide_modules = base,web
-    
+
     # Timezone
     timezone = America/Mexico_City
