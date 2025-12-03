@@ -56,6 +56,11 @@ data:
         service: http://jupyter.rml-medica.com:8888
         originRequest:
           httpHostHeader: jupyter.rml-medica.com
-          
+
+      - hostname: metabase.automateai.com.mx
+        service: http://metabase.automateai.com.mx:30030
+        originRequest:
+          httpHostHeader: metabase.automateai.com.mx
+        
       
       - service: http_status:404

@@ -16,7 +16,7 @@ data:
     db_sslmode = prefer
     db_template = template1
     db_user = dml
-    db_name = odoo16
+    db_name = odoo16-test
   
     db_password = Sergio55
     demo = {}
@@ -34,16 +34,16 @@ data:
     max_cron_threads = 1
     
     # Limites de recursos
-    limit_memory_hard = 2684354560
-    limit_memory_soft = 2147483648
-    limit_request = 8192
-    limit_time_cpu = 7200
-    limit_time_real = 7200
+    limit_memory_hard = 8589934592
+    limit_memory_soft = 6442450944
+    limit_request = 52428800
+    limit_time_cpu = 14400
+    limit_time_real = 14400
     limit_time_real_cron = 600
     
     # Proxy y seguridad - CRÍTICO PARA WEBSOCKET
-    proxy_mode = True
-    secure_cookie_httponly = True
+    #proxy_mode = True
+    #secure_cookie_httponly = True
     
     # Database settings
     list_db = True
