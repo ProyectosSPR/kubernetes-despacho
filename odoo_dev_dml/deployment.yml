@@ -76,7 +76,7 @@ spec:
               memory: "2Gi"
               cpu: "1"
             limits:
-              memory: "20Gi"
+              memory: "15Gi"
               cpu: "15"
 
         # --- Contenedor 2: Jupyter ---

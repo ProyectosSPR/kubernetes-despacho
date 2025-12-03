@@ -30,17 +30,17 @@ data:
     gevent_port = 8072
 
     # Workers configuration
-    workers = 0
+    workers = 3
     max_cron_threads = 1
 
     # Limites de recursos
-    limit_memory_hard = 0
-    limit_memory_soft = 0
+    limit_memory_hard = 2684354560
+    limit_memory_soft = 3221225472
 
-    limit_time_cpu = 8200
-    limit_time_real = 8200
-    limit_time_real_cron = 8200
-    limit_request = 8192000000
+    limit_time_cpu = 600
+    limit_time_real = 900
+    limit_time_real_cron = 1200
+    limit_request = 8192
 
     # Proxy y seguridad - CRÍTICO PARA WEBSOCKET
     #proxy_mode = True
