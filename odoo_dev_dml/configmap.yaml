@@ -31,7 +31,7 @@ data:
 
     # Workers configuration
     workers = 3
-    max_cron_threads = 1
+    max_cron_threads = 0
 
     # Limites de recursos
     limit_memory_hard = 2684354560
