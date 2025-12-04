@@ -42,6 +42,7 @@ spec:
             - "--config=/etc/odoo/odoo.conf"
             - "--limit-time-cpu=8200"
             - "--limit-time-real=8200"
+            - "--dev=all"
 
           # --- MEJORA 1: Contexto de Seguridad ---
           # Forzamos al contenedor a correr como el usuario 'odoo' (101)
