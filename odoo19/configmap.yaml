@@ -1,12 +1,12 @@
-# configmap.yaml - Configuración definitiva para Odoo 18
+# configmap.yaml - Configuración definitiva para Odoo 19
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: odoo-config18
+  name: odoo-config19
 data:
   odoo.conf: |
     [options]
-    addons_path = /mnt/extra-addons/modulos_odoo18
+    addons_path = /mnt/extra-addons/modulos_odoo19
     admin_passwd = 123456
     csv_internal_sep = ,
     data_dir = /var/lib/odoo
@@ -16,22 +16,22 @@ data:
     db_sslmode = prefer
     db_template = template1
     db_user = dml
-    db_name = odoo18
+    db_name = odoo19
     db_password = Sergio55
     demo = {}
     email_from = proyectos_spr@outlook.com
-    
+
     # Configuración HTTP principal
     http_interface = 0.0.0.0
     http_port = 8069
-    
+
     # Configuración de longpolling (Odoo 18 early versions)
     gevent_port = 8072
-    
+
     # Workers configuration
     workers = 5
     max_cron_threads = 1
-    
+
     # Limites de recursos
     limit_memory_hard = 2684354560
     limit_memory_soft = 2147483648
@@ -39,20 +39,20 @@ data:
     limit_time_cpu = 120
     limit_time_real = 300
     limit_time_real_cron = 600
-    
+
     # Proxy y seguridad - CRÍTICO PARA WEBSOCKET
     proxy_mode = true
     secure_cookie_httponly = true
-    
+
     # Database settings
     list_db = True
     log_db = True
     log_db_level = warning
     log_level = info
     logfile = False
-    
+
     # Modules
     server_wide_modules = base,web
-    
+
     # Timezone
     timezone = America/Mexico_City
