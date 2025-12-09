@@ -32,13 +32,14 @@ spec:
         # --- Contenedor 1: Odoo ---
         # Este contenedor ejecuta Odoo como el proceso principal, que es la forma correcta.
         - name: odoo19
-          image: odoo:19.0-20251208 # Usa tu imagen con las herramientas
+          image: proyectosspr/odoo19e:1.0# Usa tu imagen con las herramientas
           imagePullPolicy: Always
           # ==== ¡ESTE ES EL CAMBIO MÁS IMPORTANTE! ====
           # Anulamos completamente el CMD del Dockerfile y le damos a Odoo el control.
           command: ["/usr/bin/odoo"]
           args:
             - "--config=/etc/odoo/odoo.conf"
+            - "--dev=all"
           ports:
             - containerPort: 8069
               name: http
@@ -72,7 +73,7 @@ spec:
 
         # --- Contenedor 2: Jupyter ---
         - name: jupyter
-          image: odoo:19.0-20251208
+          image: proyectosspr/odoo19e:1.0
           imagePullPolicy: Always
           command: ["jupyter", "lab"]
           args:
