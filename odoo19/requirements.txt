@@ -1,0 +1,8 @@
+# Para el funcionamiento de Jupyter Lab
+jupyterlab
+
+# Dependencia para la conexión de Odoo con PostgreSQL
+psycopg2-binary
+
+# Dependencia para el módulo n8n-sales (para hacer llamadas a la API)
+requests

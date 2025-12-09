@@ -1,0 +1,108 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: odoo19
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: odoo19
+  template:
+    metadata:
+      labels:
+        app: odoo19
+    spec:
+      securityContext:
+        fsGroup: 101
+      initContainers:
+        - name: fix-permissions
+          image: busybox:latest
+          command:
+            [
+              "sh",
+              "-c",
+              "chown -R 101:101 /var/lib/odoo /mnt/extra-addons && chmod -R 775 /var/lib/odoo /mnt/extra-addons",
+            ]
+          volumeMounts:
+            - name: odoo-data19
+              mountPath: /var/lib/odoo
+            - name: odoo-extra-addons19
+              mountPath: /mnt/extra-addons
+      containers:
+        # --- Contenedor 1: Odoo ---
+        # Este contenedor ejecuta Odoo como el proceso principal, que es la forma correcta.
+        - name: odoo19
+          image: odoo:19.0-20251208 # Usa tu imagen con las herramientas
+          imagePullPolicy: Always
+          # ==== ¡ESTE ES EL CAMBIO MÁS IMPORTANTE! ====
+          # Anulamos completamente el CMD del Dockerfile y le damos a Odoo el control.
+          command: ["/usr/bin/odoo"]
+          args:
+            - "--config=/etc/odoo/odoo.conf"
+          ports:
+            - containerPort: 8069
+              name: http
+            - containerPort: 8072
+              name: longpolling
+          # ... tu 'env', 'volumeMounts', y 'resources' van aquí, sin cambios ...
+          env:
+            - name: HTTP_X_FORWARDED_PROTO
+              value: "https"
+            - name: HTTP_X_FORWARDED_HOST
+              value: "automateai.com.mx"
+            - name: HTTP_X_FORWARDED_PORT
+              value: "443"
+            - name: HOST
+              value: "automateai.com.mx"
+          volumeMounts:
+            - name: odoo-data19
+              mountPath: /var/lib/odoo
+            - name: config-volume19
+              mountPath: /etc/odoo
+              readOnly: true
+            - name: odoo-extra-addons19
+              mountPath: /mnt/extra-addons
+          resources:
+            requests:
+              memory: "4Gi"
+              cpu: "3"
+            limits:
+              memory: "6Gi"
+              cpu: "4"
+
+        # --- Contenedor 2: Jupyter ---
+        - name: jupyter
+          image: odoo:19.0-20251208
+          imagePullPolicy: Always
+          command: ["jupyter", "lab"]
+          args:
+            - "--ip=0.0.0.0"
+            - "--port=8888"
+            - "--ServerApp.token=admin"
+            - "--notebook-dir=/mnt/extra-addons"
+            - "--no-browser"
+            - "--allow-root"
+          ports:
+            - containerPort: 8888
+              name: jupyter
+          volumeMounts:
+            - name: odoo-data19
+              mountPath: /var/lib/odoo
+            - name: config-volume19
+              mountPath: /etc/odoo
+              readOnly: true
+            - name: odoo-extra-addons19
+              mountPath: /mnt/extra-addons
+      volumes:
+        - name: odoo-data19
+          persistentVolumeClaim:
+            claimName: odoo-data19
+        - name: config-volume19
+          configMap:
+            name: odoo-config19
+            items:
+              - key: odoo.conf
+                path: odoo.conf
+        - name: odoo-extra-addons19
+          persistentVolumeClaim:
+            claimName: odoo-extra-addons19
