@@ -6,7 +6,7 @@ metadata:
 data:
   odoo.conf: |
     [options]
-    addons_path = /mnt/extra-addons/modulos_odoo19
+    addons_path = /mnt/extra-addons/modulos_odoo19 , /mnt/extra-addons/enterprise_19
     admin_passwd = 123456
     csv_internal_sep = ,
     data_dir = /var/lib/odoo

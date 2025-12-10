@@ -16,7 +16,8 @@ data:
   POSTGRES_USER: "dml"
 
   # n8n - URL del webhook
-  N8N_WEBHOOK_URL: "https://aut.automateai.com.mx:5678/webhook/a86064e4-d5ef-4abe-85cd-be0362757f88"
+  N8N_WEBHOOK_URL: "https://aut.automateai.com.mx/webhook/a86064e4-d5ef-4abe-85cd-be0362757f88"
+  N8N_DOWNLOAD_WEBHOOK_URL: "https://aut.automateai.com.mx/webhook/archivos-facturacion"
 
   # Odoo - URLs y usuario (no sensibles)
   ODOO_URL: "https://dml-medica.com/"

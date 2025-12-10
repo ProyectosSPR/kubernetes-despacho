@@ -32,7 +32,7 @@ spec:
         # --- Contenedor 1: Odoo ---
         # Este contenedor ejecuta Odoo como el proceso principal, que es la forma correcta.
         - name: odoo19
-          image: proyectosspr/odoo19e:1.0# Usa tu imagen con las herramientas
+          image: proyectosspr/odoo19e:1.0
           imagePullPolicy: Always
           # ==== ¡ESTE ES EL CAMBIO MÁS IMPORTANTE! ====
           # Anulamos completamente el CMD del Dockerfile y le damos a Odoo el control.
