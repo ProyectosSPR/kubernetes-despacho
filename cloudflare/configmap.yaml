@@ -71,5 +71,10 @@ data:
         service: http://facturacion.rml-medica.com:5000
         originRequest:
           httpHostHeader: facturacion.rml-medica.com
+
+      - hostname: diseño.rml-medica.com
+        service: http://diseño.rml-medica.com:8069
+        originRequest:
+          httpHostHeader: diseño.rml-medica.com    
       
       - service: http_status:404
