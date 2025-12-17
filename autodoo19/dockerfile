@@ -1,0 +1,107 @@
+# Usa la imagen oficial de Odoo 18
+FROM odoo:19.0-20251208
+# ===============================================
+# Parte 1: Definir variables de entorno
+# ===============================================
+ENV JUPYTER_HOME=/opt/jupyter
+ENV ODOO_EXTRA_ADDONS=/mnt/extra-addons
+
+# ===============================================
+# Parte 2: Modificación de usuario, dependencias, clonado y permisos
+# ===============================================
+USER root
+
+# Modificamos el usuario 'odoo' para asegurar que tenga un home y un shell
+RUN usermod -d /var/lib/odoo -s /bin/bash odoo
+
+# Copiamos el archivo de dependencias ANTES de instalar para aprovechar el cache de Docker
+COPY requirements.txt .
+
+# Se agrupan múltiples comandos en una sola capa (RUN) para optimizar la imagen
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git \
+    python3-pip \
+    python3-tz \
+    # --- HERRAMIENTAS DE DIAGNÓSTICO AÑADIDAS AQUÍ ---
+    net-tools \
+    procps \
+    dnsutils \
+    curl \
+    iputils-ping \
+    nano \
+    && apt-get clean && rm -rf /var/lib/apt/lists/* \
+    # ==== ¡AQUÍ ESTÁ LA CORRECCIÓN! ====
+    # Añadimos --break-system-packages para permitir la instalación global con pip
+    && pip install --no-cache-dir --break-system-packages qifparse -r requirements.txt \
+    && git clone --depth 1 https://github.com/ProyectosSPR/modulos_odoo18.git ${ODOO_EXTRA_ADDONS} \
+    && mkdir -p ${JUPYTER_HOME} \
+    && chown -R odoo:root ${ODOO_EXTRA_ADDONS} ${JUPYTER_HOME}
+
+# ===============================================
+# Parte 3: Configurar entorno de Jupyter
+# ===============================================
+# Script de inicialización para cargar el entorno de Odoo en Jupyter
+RUN cat <<'EOF' > ${JUPYTER_HOME}/odoo_shell_init.py
+import odoo
+import builtins
+import configparser
+import logging
+
+_logger = logging.getLogger(__name__)
+
+# --- MÉTODO FINAL Y ROBUSTO ---
+
+config = configparser.ConfigParser()
+config.read('/etc/odoo/odoo.conf')
+db_name = config.get('options', 'db_name', fallback=None)
+
+# Limpiamos las variables por si el script falla
+builtins.env = None
+builtins.cr = None
+
+if not db_name:
+    print('❌ No se encontró db_name en /etc/odoo/odoo.conf. No se pudo inicializar el entorno de Odoo.')
+else:
+    try:
+        registry = odoo.modules.registry.Registry.new(db_name)
+        
+        # ==== ¡AQUÍ ESTÁ LA CORRECCIÓN CLAVE! ====
+        # Creamos el cursor SIN un bloque 'with' para que no se cierre automáticamente.
+        cr = registry.cursor()
+        
+        # Creamos el entorno con el cursor que permanecerá abierto.
+        env = odoo.api.Environment(cr, odoo.SUPERUSER_ID, {})
+        
+        # Hacemos que 'env' y 'cr' estén disponibles globalmente en Jupyter.
+        builtins.env = env
+        builtins.cr = cr
+        
+        print(f'✅ Entorno Odoo listo. Usa la variable global `env` (BD: {db_name})')
+
+    except Exception as e:
+        _logger.error("Error al inicializar el entorno de Odoo: %s", e)
+        print(f"❌ Error al inicializar el entorno de Odoo: {e}")
+        # Si falla, cerramos el cursor que abrimos manualmente.
+        if 'cr' in locals() and cr:
+            cr.close()
+EOF
+
+# Celda automática para notebooks nuevos
+RUN mkdir -p ${JUPYTER_HOME}/.ipython/profile_default/startup
+RUN echo "exec(open('${JUPYTER_HOME}/odoo_shell_init.py').read())" \
+    > ${JUPYTER_HOME}/.ipython/profile_default/startup/00-odoo-shell.py
+
+# Asegurar que IPython use el perfil creado y los permisos sean correctos
+ENV IPYTHONDIR=${JUPYTER_HOME}/.ipython
+RUN chown -R odoo:root ${JUPYTER_HOME}
+
+
+# ===============================================
+# Parte 4: Exponer puertos y configurar arranque
+# ===============================================
+EXPOSE 8069 8888 8072 8073
+
+USER odoo
+
+# Comando de arranque para iniciar Odoo y Jupyter Lab en paralelo
+CMD ["bash", "-c", "odoo -c /etc/odoo/odoo.conf & jupyter lab --ip=0.0.0.0 --port=8888 --ServerApp.token=admin --notebook-dir=${JUPYTER_HOME} --no-browser"]

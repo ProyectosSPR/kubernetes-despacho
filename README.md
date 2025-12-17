@@ -10,7 +10,7 @@ web/database/manager
 
 # para odoo 19 para pruebas
 
-odoo -d tu\_base\_de\_datos -i base --without-demo=all --http-port=8067 --stop-after-init
+odoo -d odoo19e -i base --without-demo=all --http-port=8067 --stop-after-init
 
 # Dml-odoo
 
