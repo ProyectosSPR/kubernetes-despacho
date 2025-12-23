@@ -38,6 +38,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         curl \
         iputils-ping \
         nano \
+        # --- NUEVO: Herramientas PDF ---
+        poppler-utils \
     && apt-get clean && rm -rf /var/lib/apt/lists/* \
     # 1. Actualizamos pip
     && python3 -m pip install --upgrade pip \
