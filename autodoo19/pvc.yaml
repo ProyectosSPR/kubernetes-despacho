@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: odoo-data19
+  name: odoo-data19e
 spec:
   accessModes:
     - ReadWriteOnce

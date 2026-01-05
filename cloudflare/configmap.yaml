@@ -5,7 +5,7 @@ metadata:
 data:
   config.yml: |
     tunnel: 83a2e421-2b70-4ea3-a30e-705ea7bccf36
-    
+
     ingress:
       # Evolution API - Manager interface
       - hostname: evolution.automateai.com.mx
@@ -61,6 +61,20 @@ data:
         service: http://metabase.automateai.com.mx:30030
         originRequest:
           httpHostHeader: metabase.automateai.com.mx
-        
+
+      - hostname: odoo19.automateai.com.mx
+        service: http://odoo19.automateai.com.mx:8069
+        originRequest:
+          httpHostHeader: odoo19.automateai.com.mx  
+
+      - hostname: facturacion.rml-medica.com
+        service: http://facturacion.rml-medica.com:5000
+        originRequest:
+          httpHostHeader: facturacion.rml-medica.com
+
+      - hostname: dml.rml-medica.com
+        service: http://dml.rml-medica.com:8069
+        originRequest:
+          httpHostHeader: dml.rml-medica.com    
       
       - service: http_status:404

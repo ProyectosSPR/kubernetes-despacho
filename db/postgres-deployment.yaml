@@ -14,8 +14,8 @@ spec:
     spec:
       containers:
         - name: postgres
-          image: postgres:17
-          
+          image: pgvector/pgvector:pg17
+
           # --- AÑADIDO ---
           # Pasa argumentos de configuración al comando 'postgres'
           args:
@@ -24,7 +24,7 @@ spec:
             # Puedes añadir más configuraciones aquí si lo necesitas
             # - "-c"
             # - "shared_buffers=1GB"
-          
+
           env:
             - name: POSTGRES_USER
               valueFrom:
@@ -43,17 +43,17 @@ spec:
                   key: POSTGRES_DB
             - name: PGDATA
               value: /var/lib/postgresql/data/pgdata
-          
+
           # --- MUY RECOMENDADO ---
           # Garantiza que el pod tenga suficiente RAM para las nuevas conexiones
           resources:
             requests:
               memory: "1Gi" # Solicita 1GB de RAM al iniciar
-              cpu: "500m"  # Solicita media CPU
+              cpu: "500m" # Solicita media CPU
             limits:
               memory: "2Gi" # Límite máximo de RAM, ajústalo a tu servidor
-              cpu: "1"     # Límite máximo de 1 CPU
-              
+              cpu: "1" # Límite máximo de 1 CPU
+
           volumeMounts:
             - name: postgres-storage
               mountPath: /var/lib/postgresql/data
