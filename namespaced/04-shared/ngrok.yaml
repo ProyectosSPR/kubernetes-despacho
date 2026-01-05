@@ -1,0 +1,62 @@
+# Ngrok - Túnel TCP para acceso externo a Postgres
+# Namespace: shared
+# Conecta a: postgres-nodeport.infrastructure.svc.cluster.local
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ngrok-secret
+  namespace: shared
+type: Opaque
+stringData:
+  authtoken: "TU_NGROK_AUTHTOKEN_AQUI"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ngrok-postgres
+  namespace: shared
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ngrok-postgres
+  template:
+    metadata:
+      labels:
+        app: ngrok-postgres
+    spec:
+      containers:
+      - name: ngrok
+        image: ngrok/ngrok:alpine
+        env:
+        - name: NGROK_AUTHTOKEN
+          valueFrom:
+            secretKeyRef:
+              name: ngrok-secret
+              key: authtoken
+        args:
+          - "tcp"
+          - "--log=stdout"
+          # CAMBIO CLAVE: Apuntar a postgres en namespace infrastructure
+          - "postgres-nodeport.infrastructure.svc.cluster.local:5432"
+        ports:
+        - containerPort: 4040
+          name: dashboard
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ngrok-dashboard
+  namespace: shared
+spec:
+  type: NodePort
+  ports:
+  - port: 4040
+    targetPort: 4040
+    nodePort: 30040
+  selector:
+    app: ngrok-postgres
