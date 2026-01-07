@@ -32,7 +32,7 @@ spec:
         # --- Contenedor 1: Odoo ---
         # Este contenedor ejecuta Odoo como el proceso principal, que es la forma correcta.
         - name: odoo19e
-          image: proyectosspr/odoo_19_git:1.2-claude
+          image: proyectosspr/odoo_19_git:1.3-claude
           imagePullPolicy: Always
           # ==== ¡ESTE ES EL CAMBIO MÁS IMPORTANTE! ====
           # Anulamos completamente el CMD del Dockerfile y le damos a Odoo el control.
@@ -73,7 +73,7 @@ spec:
 
         # --- Contenedor 2: Jupyter ---
         - name: jupyter19e
-          image: proyectosspr/odoo_19_git:1.2-claude
+          image: proyectosspr/odoo_19_git:1.3-claude
           imagePullPolicy: Always
           command: ["jupyter", "lab"]
           args:

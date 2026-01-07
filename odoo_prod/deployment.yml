@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: odoo16
+  name: odoo-prod
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: odoo16
+      app: odoo-prod
   template:
     metadata:
       labels:
-        app: odoo16
+        app: odoo-prod
     spec:
       # El fsGroup es una buena práctica
       securityContext:
@@ -27,15 +27,15 @@ spec:
               "chown -R 101:101 /var/lib/odoo /mnt/extra-addons && chmod -R 775 /var/lib/odoo /mnt/extra-addons",
             ]
           volumeMounts:
-            - name: odoo-data16
+            - name: odoo-data-prod
               mountPath: /var/lib/odoo
-            - name: odoo-extra-addons16
+            - name: odoo-extra-addons-prod
               mountPath: /mnt/extra-addons
             
 
       containers:
         # --- Contenedor 1: Odoo ---
-        - name: odoo16
+        - name: odoo-prod
           image: proyectosspr/odoo_16_git:1.8-claude
           imagePullPolicy: Always
           command: ["/usr/bin/odoo"]
@@ -66,14 +66,14 @@ spec:
             - name: HOST
               value: "automateai.com.mx"
           volumeMounts:
-            - name: odoo-data16
+            - name: odoo-data-prod
               mountPath: /var/lib/odoo
-            - name: config-volume16
+            - name: config-volume-prod
               mountPath: /etc/odoo
               readOnly: true
-            - name: odoo-extra-addons16
+            - name: odoo-extra-addons-prod
               mountPath: /mnt/extra-addons
-           
+
           resources:
             requests:
               memory: "2Gi"
@@ -105,26 +105,26 @@ spec:
             - containerPort: 8888
               name: jupyter
           volumeMounts:
-            - name: odoo-data16
+            - name: odoo-data-prod
               mountPath: /var/lib/odoo
-            - name: config-volume16
+            - name: config-volume-prod
               mountPath: /etc/odoo
               readOnly: true
-            - name: odoo-extra-addons16
+            - name: odoo-extra-addons-prod
               mountPath: /mnt/extra-addons
 
 
       volumes:
-        - name: odoo-data16
+        - name: odoo-data-prod
           persistentVolumeClaim:
-            claimName: odoo-data16
-        - name: config-volume16
+            claimName: odoo-data-prod
+        - name: config-volume-prod
           configMap:
-            name: odoo-config16
+            name: odoo-config-prod
             items:
               - key: odoo.conf
                 path: odoo.conf
-        - name: odoo-extra-addons16
+        - name: odoo-extra-addons-prod
           persistentVolumeClaim:
-            claimName: odoo-extra-addons16
+            claimName: odoo-extra-addons-prod
 
