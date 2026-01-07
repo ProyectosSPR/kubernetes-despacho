@@ -1,0 +1,73 @@
+# Metabase - Business Intelligence compartido
+# Namespace: shared
+# Conexión a BD: postgres-nodeport.infrastructure.svc.cluster.local
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: metabase-config
+  namespace: shared
+data:
+  MB_DB_TYPE: "postgres"
+  MB_DB_DBNAME: "metabase"
+  MB_DB_PORT: "5432"
+  MB_DB_USER: "metabase_user"
+  # CAMBIO CLAVE: Conexión a postgres en namespace infrastructure
+  MB_DB_HOST: "postgres-nodeport.infrastructure.svc.cluster.local"
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: metabase-secret
+  namespace: shared
+type: Opaque
+stringData:
+  MB_DB_PASS: "Sergio55"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: metabase
+  namespace: shared
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: metabase
+  template:
+    metadata:
+      labels:
+        app: metabase
+    spec:
+      containers:
+      - name: metabase
+        image: metabase/metabase:latest
+        ports:
+        - containerPort: 3000
+        envFrom:
+        - configMapRef:
+            name: metabase-config
+        - secretRef:
+            name: metabase-secret
+        resources:
+          requests:
+            cpu: 10m
+            memory: 512Mi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: metabase
+  namespace: shared
+spec:
+  type: NodePort
+  ports:
+  - port: 3000
+    targetPort: 3000
+    nodePort: 30030
+  selector:
+    app: metabase

@@ -1,0 +1,214 @@
+# Odoo 18 Development - Instancia de desarrollo para AutomateAI
+# Namespace: automateai
+# Conexión a BD: postgres-nodeport.infrastructure.svc.cluster.local
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: odoo-data18
+  namespace: automateai
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: odoo-extra-addons18
+  namespace: automateai
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: odoo-config18
+  namespace: automateai
+data:
+  odoo.conf: |
+    [options]
+    addons_path = /mnt/extra-addons/modulos_odoo18
+    admin_passwd = 123456
+    csv_internal_sep = ,
+    data_dir = /var/lib/odoo
+    # CAMBIO CLAVE: Conexión a postgres en namespace infrastructure
+    db_host = postgres-nodeport.infrastructure.svc.cluster.local
+    db_maxconn = 64
+    db_port = 5432
+    db_sslmode = prefer
+    db_template = template1
+    db_user = dml
+    db_name = odoo18
+    db_password = Sergio55
+    demo = {}
+    email_from = proyectos_spr@outlook.com
+
+    # Configuración HTTP principal
+    http_interface = 0.0.0.0
+    http_port = 8069
+
+    # Configuración de longpolling (Odoo 18 early versions)
+    gevent_port = 8072
+
+    # Workers configuration
+    workers = 5
+    max_cron_threads = 1
+
+    # Limites de recursos
+    limit_memory_hard = 2684354560
+    limit_memory_soft = 2147483648
+    limit_request = 8192
+    limit_time_cpu = 120
+    limit_time_real = 300
+    limit_time_real_cron = 600
+
+    # Proxy y seguridad - CRÍTICO PARA WEBSOCKET
+    proxy_mode = true
+    secure_cookie_httponly = true
+
+    # Database settings
+    list_db = True
+    log_db = True
+    log_db_level = warning
+    log_level = info
+    logfile = False
+
+    # Modules
+    server_wide_modules = base,web
+
+    # Timezone
+    timezone = America/Mexico_City
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: odoo18
+  namespace: automateai
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: odoo18
+  template:
+    metadata:
+      labels:
+        app: odoo18
+    spec:
+      securityContext:
+        fsGroup: 101
+      initContainers:
+      - name: fix-permissions
+        image: busybox:latest
+        command: ["sh", "-c", "chown -R 101:101 /var/lib/odoo /mnt/extra-addons && chmod -R 775 /var/lib/odoo /mnt/extra-addons"]
+        volumeMounts:
+          - name: odoo-data18
+            mountPath: /var/lib/odoo
+          - name: odoo-extra-addons18
+            mountPath: /mnt/extra-addons
+      containers:
+        - name: odoo18
+          image: proyectosspr/odoo_18_git:4.4
+          imagePullPolicy: Always
+          command: ["/usr/bin/odoo"]
+          args:
+            - "--config=/etc/odoo/odoo.conf"
+          ports:
+            - containerPort: 8069
+              name: http
+            - containerPort: 8072
+              name: longpolling
+          env:
+            - name: HTTP_X_FORWARDED_PROTO
+              value: "https"
+            - name: HTTP_X_FORWARDED_HOST
+              value: "automateai.com.mx"
+            - name: HTTP_X_FORWARDED_PORT
+              value: "443"
+            - name: HOST
+              value: "automateai.com.mx"
+          volumeMounts:
+            - name: odoo-data18
+              mountPath: /var/lib/odoo
+            - name: config-volume18
+              mountPath: /etc/odoo
+              readOnly: true
+            - name: odoo-extra-addons18
+              mountPath: /mnt/extra-addons
+          resources:
+            requests:
+              memory: "4Gi"
+              cpu: "3"
+            limits:
+              memory: "6Gi"
+              cpu: "4"
+
+        - name: jupyter
+          image: proyectosspr/odoo_18_git:4.4
+          imagePullPolicy: Always
+          command: ["jupyter", "lab"]
+          args:
+            - "--ip=0.0.0.0"
+            - "--port=8888"
+            - "--ServerApp.token=admin"
+            - "--notebook-dir=/mnt/extra-addons"
+            - "--no-browser"
+            - "--allow-root"
+          ports:
+            - containerPort: 8888
+              name: jupyter
+          volumeMounts:
+            - name: odoo-data18
+              mountPath: /var/lib/odoo
+            - name: config-volume18
+              mountPath: /etc/odoo
+              readOnly: true
+            - name: odoo-extra-addons18
+              mountPath: /mnt/extra-addons
+      volumes:
+        - name: odoo-data18
+          persistentVolumeClaim:
+            claimName: odoo-data18
+        - name: config-volume18
+          configMap:
+            name: odoo-config18
+            items:
+              - key: odoo.conf
+                path: odoo.conf
+        - name: odoo-extra-addons18
+          persistentVolumeClaim:
+            claimName: odoo-extra-addons18
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: odoo18
+  namespace: automateai
+spec:
+  selector:
+    app: odoo18
+  ports:
+    - protocol: TCP
+      name: http
+      port: 8069
+      targetPort: 8069
+    - protocol: TCP
+      name: longpolling
+      port: 8072
+      targetPort: 8072
+    - protocol: TCP
+      name: jupyter
+      port: 8888
+      targetPort: 8888
+  type: ClusterIP

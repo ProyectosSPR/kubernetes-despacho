@@ -1,0 +1,82 @@
+# pgAdmin - Administrador web de PostgreSQL
+# Namespace: infrastructure
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: pgadmin-secret
+  namespace: infrastructure
+type: Opaque
+data:
+  PGADMIN_DEFAULT_EMAIL: cHJveWVjdG9zX3NwckBvdXRsb29rLmNvbQ==
+  PGADMIN_DEFAULT_PASSWORD: U2VyZ2lvNTU=
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pgadmin-pvc
+  namespace: infrastructure
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pgadmin
+  namespace: infrastructure
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pgadmin
+  template:
+    metadata:
+      labels:
+        app: pgadmin
+    spec:
+      containers:
+        - name: pgadmin
+          image: dpage/pgadmin4:latest
+          env:
+            - name: PGADMIN_DEFAULT_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: pgadmin-secret
+                  key: PGADMIN_DEFAULT_EMAIL
+            - name: PGADMIN_DEFAULT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pgadmin-secret
+                  key: PGADMIN_DEFAULT_PASSWORD
+          volumeMounts:
+            - name: pgadmin-storage
+              mountPath: /var/lib/pgadmin
+          ports:
+            - containerPort: 80
+      volumes:
+        - name: pgadmin-storage
+          persistentVolumeClaim:
+            claimName: pgadmin-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pgadmin-nodeport
+  namespace: infrastructure
+spec:
+  type: NodePort
+  selector:
+    app: pgadmin
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+    nodePort: 30050

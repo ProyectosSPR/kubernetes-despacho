@@ -1,0 +1,63 @@
+# Resource Quotas opcionales para limitar recursos por namespace
+# Ajusta los valores según tu cluster
+# Aplicar con: kubectl apply -f resource-quotas.yaml
+
+---
+# Quota para AutomateAI
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: automateai-quota
+  namespace: automateai
+spec:
+  hard:
+    requests.cpu: "20"      # Máximo 20 CPUs solicitadas
+    requests.memory: 40Gi   # Máximo 40GB RAM solicitada
+    limits.cpu: "30"        # Máximo 30 CPUs límite
+    limits.memory: 60Gi     # Máximo 60GB RAM límite
+    persistentvolumeclaims: "20"  # Máximo 20 PVCs
+
+---
+# Quota para DML
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: dml-quota
+  namespace: dml
+spec:
+  hard:
+    requests.cpu: "20"
+    requests.memory: 40Gi
+    limits.cpu: "30"
+    limits.memory: 60Gi
+    persistentvolumeclaims: "20"
+
+---
+# Quota para Shared
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: shared-quota
+  namespace: shared
+spec:
+  hard:
+    requests.cpu: "10"
+    requests.memory: 20Gi
+    limits.cpu: "15"
+    limits.memory: 30Gi
+    persistentvolumeclaims: "10"
+
+---
+# Quota para Infrastructure
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: infrastructure-quota
+  namespace: infrastructure
+spec:
+  hard:
+    requests.cpu: "10"
+    requests.memory: 20Gi
+    limits.cpu: "15"
+    limits.memory: 30Gi
+    persistentvolumeclaims: "10"

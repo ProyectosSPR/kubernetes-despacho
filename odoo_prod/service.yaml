@@ -1,0 +1,22 @@
+# service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: odoo16
+spec:
+  selector:
+    app: odoo16
+  ports:
+    - protocol: TCP
+      name: http
+      port: 8069
+      targetPort: 8069
+    - protocol: TCP
+      name: longpolling
+      port: 8072
+      targetPort: 8072
+    - protocol: TCP
+      name: jupyter
+      port: 8888
+      targetPort: 8888
+  type: ClusterIP

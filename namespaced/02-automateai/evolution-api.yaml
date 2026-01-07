@@ -1,0 +1,149 @@
+# Evolution API - WhatsApp API para AutomateAI
+# Namespace: automateai
+# Conexión a BD: postgres-nodeport.infrastructure.svc.cluster.local
+# Conexión a Redis: redis.infrastructure.svc.cluster.local
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: evolution-secrets
+  namespace: automateai
+type: Opaque
+stringData:
+  AUTHENTICATION_API_KEY: "123456.+az1"
+  # CAMBIO CLAVE: Actualizar URIs para apuntar a infrastructure namespace
+  DATABASE_CONNECTION_URI: "postgresql://dml:Sergio55@postgres-nodeport.infrastructure.svc.cluster.local:5432/evolutiondb"
+  CACHE_REDIS_URI: "redis://redis.infrastructure.svc.cluster.local:6379/6"
+  MANAGER_PASSWORD: "Sergio55"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: evolution-config
+  namespace: automateai
+data:
+  # Database configuration
+  DATABASE_ENABLED: "true"
+  DATABASE_PROVIDER: "postgresql"
+  DATABASE_CONNECTION_CLIENT_NAME: "evolution_exchange"
+  DATABASE_SAVE_DATA_INSTANCE: "true"
+  DATABASE_SAVE_DATA_NEW_MESSAGE: "true"
+  DATABASE_SAVE_MESSAGE_UPDATE: "true"
+  DATABASE_SAVE_DATA_CONTACTS: "true"
+  DATABASE_SAVE_DATA_CHATS: "true"
+  DATABASE_SAVE_DATA_LABELS: "true"
+  DATABASE_SAVE_DATA_HISTORIC: "true"
+
+  # Cache configuration
+  CACHE_REDIS_ENABLED: "true"
+  CACHE_REDIS_PREFIX_KEY: "evolution"
+  CACHE_REDIS_SAVE_INSTANCES: "false"
+  CACHE_LOCAL_ENABLED: "false"
+
+  # Server configuration
+  SERVER_PORT: "8080"
+  SERVER_URL: "https://evolution.automateai.com.mx"
+
+  # Webhook configuration
+  WEBHOOK_BASE: "https://evolution.automateai.com.mx"
+
+  # Static files configuration
+  MANAGER_URL: "https://evolution.automateai.com.mx/manager"
+
+  # WhatsApp configuration
+  CONFIG_SESSION_PHONE_VERSION: "2.3000.1028340218"
+
+  # Logs
+  LOG_LEVEL: "ERROR,WARN,DEBUG,INFO,LOG,VERBOSE,DARK,WEBHOOKS,false"
+  LOG_COLOR: "true"
+  LOG_BAILEYS: "false"
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: evolution-instances-pvc
+  namespace: automateai
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: evolution-api
+  namespace: automateai
+  labels:
+    app: evolution-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: evolution-api
+  template:
+    metadata:
+      labels:
+        app: evolution-api
+    spec:
+      containers:
+        - name: evolution-api
+          image: atendai/evolution-api:latest
+          ports:
+            - containerPort: 8080
+              name: http
+          envFrom:
+            - configMapRef:
+                name: evolution-config
+            - secretRef:
+                name: evolution-secrets
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "1Gi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 5
+      volumes:
+        - name: evolution-instances
+          persistentVolumeClaim:
+            claimName: evolution-instances-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: evolution-api-service
+  namespace: automateai
+  labels:
+    app: evolution-api
+spec:
+  selector:
+    app: evolution-api
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+      name: http
+  type: ClusterIP
