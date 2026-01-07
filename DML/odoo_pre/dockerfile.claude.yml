@@ -1,0 +1,108 @@
+# ------------------------------------------------------------------
+# Dockerfile para Odoo 16 con Jupyter Lab + Claude Code
+# ------------------------------------------------------------------
+
+FROM odoo:16
+
+# ===============================================
+# Parte 1: Definir variables de entorno
+# ===============================================
+ENV JUPYTER_HOME=/opt/jupyter
+ENV ODOO_EXTRA_ADDONS=/mnt/extra-addons
+
+# ===============================================
+# Parte 2: Dependencias, Node.js, Claude Code y configuración
+# ===============================================
+USER root
+
+RUN usermod -d /var/lib/odoo -s /bin/bash odoo
+
+COPY requirements.txt .
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        git \
+        python3-pip \
+        build-essential \
+        python3-dev \
+        libldap2-dev \
+        libsasl2-dev \
+        net-tools \
+        procps \
+        dnsutils \
+        curl \
+        iputils-ping \
+        nano \
+        poppler-utils \
+        # --- Dependencias para Node.js ---
+        ca-certificates \
+        gnupg \
+    && apt-get clean && rm -rf /var/lib/apt/lists/* \
+    # --- Instalar Node.js 20 LTS ---
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
+    && apt-get clean && rm -rf /var/lib/apt/lists/* \
+    # --- Instalar Claude Code globalmente ---
+    && npm install -g @anthropic-ai/claude-code \
+    # --- Python: pip y requirements ---
+    && python3 -m pip install --upgrade pip \
+    && pip install --no-cache-dir --ignore-installed --break-system-packages -r requirements.txt \
+    # --- Clonar módulos Odoo ---
+    && git clone --depth 1 https://github.com/ProyectosSPR/modulos_odoo.git ${ODOO_EXTRA_ADDONS} \
+    # --- Crear carpetas y permisos ---
+    && mkdir -p ${JUPYTER_HOME} \
+    && chown -R odoo:root ${ODOO_EXTRA_ADDONS} ${JUPYTER_HOME}
+
+# ===============================================
+# Parte 3: Configurar entorno de Jupyter
+# ===============================================
+RUN cat <<'EOF' > ${JUPYTER_HOME}/odoo_shell_init.py
+import odoo
+import builtins
+import configparser
+import logging
+
+_logger = logging.getLogger(__name__)
+
+config = configparser.ConfigParser()
+config.read('/etc/odoo/odoo.conf')
+db_name = config.get('options', 'db_name', fallback=None)
+
+builtins.env = None
+builtins.cr = None
+
+if not db_name:
+    print('❌ No se encontró db_name en /etc/odoo/odoo.conf. No se pudo inicializar el entorno de Odoo.')
+else:
+    try:
+        registry = odoo.modules.registry.Registry.new(db_name)
+        cr = registry.cursor()
+        env = odoo.api.Environment(cr, odoo.SUPERUSER_ID, {})
+        
+        builtins.env = env
+        builtins.cr = cr
+        
+        print(f'✅ Entorno Odoo listo. Usa la variable global `env` (BD: {db_name})')
+
+    except Exception as e:
+        _logger.error("Error al inicializar el entorno de Odoo: %s", e)
+        print(f"❌ Error al inicializar el entorno de Odoo: {e}")
+        if 'cr' in locals() and cr:
+            cr.close()
+EOF
+
+RUN mkdir -p ${JUPYTER_HOME}/.ipython/profile_default/startup
+RUN echo "exec(open('${JUPYTER_HOME}/odoo_shell_init.py').read())" \
+    > ${JUPYTER_HOME}/.ipython/profile_default/startup/00-odoo-shell.py
+
+ENV IPYTHONDIR=${JUPYTER_HOME}/.ipython
+RUN chown -R odoo:root ${JUPYTER_HOME}
+
+# ===============================================
+# Parte 4: Exponer puertos y configurar arranque
+# ===============================================
+EXPOSE 8069 8888 8072
+
+USER odoo
+WORKDIR /var/lib/odoo
+
+CMD ["bash", "-c", "odoo -c /etc/odoo/odoo.conf & jupyter lab --ip=0.0.0.0 --port=8888 --ServerApp.token=admin --notebook-dir=/var/lib/odoo --no-browser"]

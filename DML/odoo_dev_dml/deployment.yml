@@ -12,12 +12,11 @@ spec:
       labels:
         app: odoo16
     spec:
-      # El fsGroup es una buena práctica
       securityContext:
         fsGroup: 101
 
-      # Tu initContainer está perfecto. Arregla la propiedad de los volúmenes.
       initContainers:
+        # InitContainer 1: Arreglar permisos
         - name: fix-permissions
           image: busybox:latest
           command:
@@ -31,7 +30,37 @@ spec:
               mountPath: /var/lib/odoo
             - name: odoo-extra-addons16
               mountPath: /mnt/extra-addons
-            
+
+        # InitContainer 2: Clonar/Actualizar repositorio
+        - name: git-clone
+          image: alpine/git:latest
+          env:
+            - name: GIT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: gitlab-credentials
+                  key: username
+            - name: GIT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: gitlab-credentials
+                  key: password
+          command:
+            - sh
+            - -c
+            - |
+              REPO_DIR="/mnt/extra-addons/modulos_odoo"
+              if [ -d "$REPO_DIR/.git" ]; then
+                echo "📦 Repositorio existe, actualizando..."
+                cd $REPO_DIR && git pull
+              else
+                echo "📥 Clonando repositorio..."
+                git clone https://${GIT_USERNAME}:${GIT_PASSWORD}@gitlab.automateai.com.mx/dml/modulos_odoo.git $REPO_DIR
+              fi
+              echo "✅ Listo"
+          volumeMounts:
+            - name: odoo-extra-addons16
+              mountPath: /mnt/extra-addons
 
       containers:
         # --- Contenedor 1: Odoo ---
@@ -44,13 +73,9 @@ spec:
             - "--limit-time-cpu=8200"
             - "--limit-time-real=8200"
             - "--dev=all"
-
-          # --- MEJORA 1: Contexto de Seguridad ---
-          # Forzamos al contenedor a correr como el usuario 'odoo' (101)
           securityContext:
             runAsUser: 101
             runAsGroup: 101
-
           ports:
             - containerPort: 8069
               name: http
@@ -73,7 +98,6 @@ spec:
               readOnly: true
             - name: odoo-extra-addons16
               mountPath: /mnt/extra-addons
-           
           resources:
             requests:
               memory: "2Gi"
@@ -93,14 +117,9 @@ spec:
             - "--ServerApp.token=admin"
             - "--notebook-dir=/mnt/extra-addons"
             - "--no-browser"
-            # --- MEJORA 2: Se elimina '--allow-root' ---
-            # Ya no es necesario porque forzamos al usuario 101
-
-          # --- MEJORA 1 (Repetida): Contexto de Seguridad ---
           securityContext:
             runAsUser: 101
             runAsGroup: 101
-
           ports:
             - containerPort: 8888
               name: jupyter
@@ -112,7 +131,6 @@ spec:
               readOnly: true
             - name: odoo-extra-addons16
               mountPath: /mnt/extra-addons
-
 
       volumes:
         - name: odoo-data16
@@ -127,4 +145,3 @@ spec:
         - name: odoo-extra-addons16
           persistentVolumeClaim:
             claimName: odoo-extra-addons16
-

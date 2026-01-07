@@ -1,0 +1,60 @@
+# configmap.yaml - Configuración definitiva para Odoo 18
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: odoo-config16
+data:
+  odoo.conf: |
+    [options]
+    addons_path = /mnt/extra-addons/modulos_odoo
+    admin_passwd = 123456
+    csv_internal_sep = ,
+    data_dir = /var/lib/odoo
+    db_host = postgres
+    db_maxconn = 64
+    db_port = 5432
+    db_sslmode = prefer
+    db_template = template1
+    db_user = dml
+    db_name = odoo16c
+
+    db_password = Sergio55
+    demo = {}
+    email_from = proyectos_spr@outlook.com
+
+    # Configuración HTTP principal
+    http_interface = 0.0.0.0
+    http_port = 8069
+
+    # Configuración de longpolling (Odoo 18 early versions)
+    gevent_port = 8072
+
+    # Workers configuration
+    workers = 3
+    max_cron_threads = 0
+
+    # Limites de recursos
+    limit_memory_hard = 2684354560
+    limit_memory_soft = 3221225472
+
+    limit_time_cpu = 600
+    limit_time_real = 900
+    limit_time_real_cron = 1200
+    limit_request = 8192
+
+    # Proxy y seguridad - CRÍTICO PARA WEBSOCKET
+    #proxy_mode = True
+    #secure_cookie_httponly = True
+
+    # Database settings
+    list_db = True
+    log_db = True
+    log_db_level = warning
+    log_level = info
+    logfile = False
+
+    # Modules
+    server_wide_modules = base,web
+
+    # Timezone
+    timezone = America/Mexico_City
