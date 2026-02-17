@@ -50,6 +50,7 @@ xlrd==2.0.1
 XlsxWriter==3.2.0
 xlwt==1.3.0
 zeep==4.2.1
+rlPyCairo
 
 # ===================================================
 # Dependencias extra de tu "pip list" funcional

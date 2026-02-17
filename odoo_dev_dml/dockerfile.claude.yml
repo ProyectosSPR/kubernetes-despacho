@@ -1,7 +1,6 @@
 # ------------------------------------------------------------------
 # Dockerfile para Odoo 16 con Jupyter Lab + Claude Code
 # ------------------------------------------------------------------
-
 FROM odoo:16
 
 # ===============================================
@@ -33,6 +32,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         iputils-ping \
         nano \
         poppler-utils \
+        # --- Dependencias para pycairo ---
+        libcairo2-dev \
+        pkg-config \
+        # --- Dependencias para python-magic ---
+        libmagic1 \
         # --- Dependencias para Node.js ---
         ca-certificates \
         gnupg \
@@ -55,7 +59,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # ===============================================
 # Parte 3: Configurar entorno de Jupyter
 # ===============================================
-RUN cat <<'EOF' > ${JUPYTER_HOME}/odoo_shell_init.py
+RUN cat <<'JUPEOF' > ${JUPYTER_HOME}/odoo_shell_init.py
 import odoo
 import builtins
 import configparser
@@ -77,18 +81,17 @@ else:
         registry = odoo.modules.registry.Registry.new(db_name)
         cr = registry.cursor()
         env = odoo.api.Environment(cr, odoo.SUPERUSER_ID, {})
-        
+
         builtins.env = env
         builtins.cr = cr
-        
-        print(f'✅ Entorno Odoo listo. Usa la variable global `env` (BD: {db_name})')
 
+        print(f'✅ Entorno Odoo listo. Usa la variable global `env` (BD: {db_name})')
     except Exception as e:
         _logger.error("Error al inicializar el entorno de Odoo: %s", e)
         print(f"❌ Error al inicializar el entorno de Odoo: {e}")
         if 'cr' in locals() and cr:
             cr.close()
-EOF
+JUPEOF
 
 RUN mkdir -p ${JUPYTER_HOME}/.ipython/profile_default/startup
 RUN echo "exec(open('${JUPYTER_HOME}/odoo_shell_init.py').read())" \
