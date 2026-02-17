@@ -1,102 +1,7 @@
-# Odoo 16 DML - Instancia de desarrollo para DML
-# Namespace: dml
-# Conexión a BD: postgres-nodeport.infrastructure.svc.cluster.local
-
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: odoo-data16
-  namespace: dml
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 30Gi
-
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: odoo-extra-addons16
-  namespace: dml
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 2Gi
-
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: odoo-addons16
-  namespace: dml
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 2Gi
-
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: odoo-config16
-  namespace: dml
-data:
-  odoo.conf: |
-    [options]
-    addons_path = /mnt/extra-addons/modulos_odoo16
-    admin_passwd = 123456
-    csv_internal_sep = ,
-    data_dir = /var/lib/odoo
-    # CAMBIO CLAVE: Conexión a postgres en namespace infrastructure
-    db_host = postgres-nodeport.infrastructure.svc.cluster.local
-    db_maxconn = 64
-    db_port = 5432
-    db_sslmode = prefer
-    db_template = template1
-    db_user = dml
-    db_name = dml
-    db_password = Sergio55
-    demo = {}
-    email_from = proyectos_spr@outlook.com
-
-    http_interface = 0.0.0.0
-    http_port = 8069
-    gevent_port = 8072
-    workers = 5
-    max_cron_threads = 1
-
-    limit_memory_hard = 2684354560
-    limit_memory_soft = 2147483648
-    limit_request = 8192
-    limit_time_cpu = 120
-    limit_time_real = 300
-    limit_time_real_cron = 600
-
-    proxy_mode = true
-    secure_cookie_httponly = true
-
-    list_db = True
-    log_db = True
-    log_db_level = warning
-    log_level = info
-    logfile = False
-
-    server_wide_modules = base,web
-    timezone = America/Mexico_City
-
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: odoo16
-  namespace: dml
 spec:
   replicas: 1
   selector:
@@ -109,7 +14,9 @@ spec:
     spec:
       securityContext:
         fsGroup: 101
+
       initContainers:
+        # InitContainer 1: Arreglar permisos
         - name: fix-permissions
           image: busybox:latest
           command:
@@ -123,7 +30,40 @@ spec:
               mountPath: /var/lib/odoo
             - name: odoo-extra-addons16
               mountPath: /mnt/extra-addons
+
+        # InitContainer 2: Clonar/Actualizar repositorio
+        - name: git-clone
+          image: alpine/git:latest
+          env:
+            - name: GIT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: gitlab-credentials
+                  key: username
+            - name: GIT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: gitlab-credentials
+                  key: password
+          command:
+            - sh
+            - -c
+            - |
+              REPO_DIR="/mnt/extra-addons/modulos_odoo"
+              if [ -d "$REPO_DIR/.git" ]; then
+                echo "📦 Repositorio existe, actualizando..."
+                cd $REPO_DIR && git pull
+              else
+                echo "📥 Clonando repositorio..."
+                git clone https://${GIT_USERNAME}:${GIT_PASSWORD}@gitlab.automateai.com.mx/dml/modulos_odoo.git $REPO_DIR
+              fi
+              echo "✅ Listo"
+          volumeMounts:
+            - name: odoo-extra-addons16
+              mountPath: /mnt/extra-addons
+
       containers:
+        # --- Contenedor 1: Odoo ---
         - name: odoo16
           image: proyectosspr/odoo_16_git:1.8-claude
           imagePullPolicy: Always
@@ -166,6 +106,7 @@ spec:
               memory: "15Gi"
               cpu: "15"
 
+        # --- Contenedor 2: Jupyter ---
         - name: jupyter
           image: proyectosspr/odoo_16_git:1.8-claude
           imagePullPolicy: Always
@@ -190,6 +131,7 @@ spec:
               readOnly: true
             - name: odoo-extra-addons16
               mountPath: /mnt/extra-addons
+
       volumes:
         - name: odoo-data16
           persistentVolumeClaim:
@@ -203,27 +145,3 @@ spec:
         - name: odoo-extra-addons16
           persistentVolumeClaim:
             claimName: odoo-extra-addons16
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: odoo16
-  namespace: dml
-spec:
-  selector:
-    app: odoo16
-  ports:
-    - protocol: TCP
-      name: http
-      port: 8069
-      targetPort: 8069
-    - protocol: TCP
-      name: longpolling
-      port: 8072
-      targetPort: 8072
-    - protocol: TCP
-      name: jupyter
-      port: 8888
-      targetPort: 8888
-  type: ClusterIP

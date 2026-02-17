@@ -1,20 +1,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: odoo19e
+  name: odoo16
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: odoo19e
+      app: odoo16
   template:
     metadata:
       labels:
-        app: odoo19e
+        app: odoo16
     spec:
       securityContext:
         fsGroup: 101
+
       initContainers:
+        # InitContainer 1: Arreglar permisos
         - name: fix-permissions
           image: busybox:latest
           command:
@@ -24,28 +26,61 @@ spec:
               "chown -R 101:101 /var/lib/odoo /mnt/extra-addons && chmod -R 775 /var/lib/odoo /mnt/extra-addons",
             ]
           volumeMounts:
-            - name: odoo-data19e
+            - name: odoo-data16
               mountPath: /var/lib/odoo
-            - name: odoo-extra-addons19e
+            - name: odoo-extra-addons16
               mountPath: /mnt/extra-addons
+
+        # InitContainer 2: Clonar/Actualizar repositorio
+        - name: git-clone
+          image: alpine/git:latest
+          env:
+            - name: GIT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: gitlab-credentials
+                  key: username
+            - name: GIT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: gitlab-credentials
+                  key: password
+          command:
+            - sh
+            - -c
+            - |
+              REPO_DIR="/mnt/extra-addons/modulos_odoo"
+              if [ -d "$REPO_DIR/.git" ]; then
+                echo "📦 Repositorio existe, actualizando..."
+                cd $REPO_DIR && git pull
+              else
+                echo "📥 Clonando repositorio..."
+                git clone https://${GIT_USERNAME}:${GIT_PASSWORD}@gitlab.automateai.com.mx/dml/modulos_odoo.git $REPO_DIR
+              fi
+              echo "✅ Listo"
+          volumeMounts:
+            - name: odoo-extra-addons16
+              mountPath: /mnt/extra-addons
+
       containers:
         # --- Contenedor 1: Odoo ---
-        # Este contenedor ejecuta Odoo como el proceso principal, que es la forma correcta.
-        - name: odoo19e
-          image: proyectosspr/odoo_19_git:1.2-claude
+        - name: odoo16
+          image: proyectosspr/odoo_16_git:1.8-claude
           imagePullPolicy: Always
-          # ==== ¡ESTE ES EL CAMBIO MÁS IMPORTANTE! ====
-          # Anulamos completamente el CMD del Dockerfile y le damos a Odoo el control.
           command: ["/usr/bin/odoo"]
           args:
             - "--config=/etc/odoo/odoo.conf"
+            - "--limit-time-cpu=8200"
+            - "--limit-time-real=8200"
             - "--dev=all"
+          securityContext:
+            runAsUser: 101
+            runAsGroup: 101
           ports:
             - containerPort: 8069
               name: http
             - containerPort: 8072
               name: longpolling
-          # ... tu 'env', 'volumeMounts', y 'resources' van aquí, sin cambios ...
           env:
             - name: HTTP_X_FORWARDED_PROTO
               value: "https"
@@ -56,24 +91,24 @@ spec:
             - name: HOST
               value: "automateai.com.mx"
           volumeMounts:
-            - name: odoo-data19e
+            - name: odoo-data16
               mountPath: /var/lib/odoo
-            - name: config-volume19e
+            - name: config-volume16
               mountPath: /etc/odoo
               readOnly: true
-            - name: odoo-extra-addons19e
+            - name: odoo-extra-addons16
               mountPath: /mnt/extra-addons
           resources:
             requests:
-              memory: "4Gi"
-              cpu: "3"
+              memory: "2Gi"
+              cpu: "1"
             limits:
-              memory: "6Gi"
-              cpu: "4"
+              memory: "15Gi"
+              cpu: "15"
 
         # --- Contenedor 2: Jupyter ---
-        - name: jupyter19e
-          image: proyectosspr/odoo_19_git:1.2-claude
+        - name: jupyter
+          image: proyectosspr/odoo_16_git:1.8-claude
           imagePullPolicy: Always
           command: ["jupyter", "lab"]
           args:
@@ -82,28 +117,31 @@ spec:
             - "--ServerApp.token=admin"
             - "--notebook-dir=/mnt/extra-addons"
             - "--no-browser"
-            - "--allow-root"
+          securityContext:
+            runAsUser: 101
+            runAsGroup: 101
           ports:
             - containerPort: 8888
               name: jupyter
           volumeMounts:
-            - name: odoo-data19e
+            - name: odoo-data16
               mountPath: /var/lib/odoo
-            - name: config-volume19e
+            - name: config-volume16
               mountPath: /etc/odoo
               readOnly: true
-            - name: odoo-extra-addons19e
+            - name: odoo-extra-addons16
               mountPath: /mnt/extra-addons
+
       volumes:
-        - name: odoo-data19e
+        - name: odoo-data16
           persistentVolumeClaim:
-            claimName: odoo-data19e
-        - name: config-volume19e
+            claimName: odoo-data16
+        - name: config-volume16
           configMap:
-            name: odoo-config19e
+            name: odoo-config16
             items:
               - key: odoo.conf
                 path: odoo.conf
-        - name: odoo-extra-addons19e
+        - name: odoo-extra-addons16
           persistentVolumeClaim:
-            claimName: odoo-extra-addons19e
+            claimName: odoo-extra-addons16

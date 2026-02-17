@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: odoo-config16prod
+  name: odoo-config16
 data:
   odoo.conf: |
     [options]

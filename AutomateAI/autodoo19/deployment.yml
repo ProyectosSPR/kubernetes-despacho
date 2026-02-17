@@ -1,22 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: odoo16
+  name: odoo19e
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: odoo16
+      app: odoo19e
   template:
     metadata:
       labels:
-        app: odoo16
+        app: odoo19e
     spec:
-      # El fsGroup es una buena práctica
       securityContext:
         fsGroup: 101
-
-      # Tu initContainer está perfecto. Arregla la propiedad de los volúmenes.
       initContainers:
         - name: fix-permissions
           image: busybox:latest
@@ -27,35 +24,28 @@ spec:
               "chown -R 101:101 /var/lib/odoo /mnt/extra-addons && chmod -R 775 /var/lib/odoo /mnt/extra-addons",
             ]
           volumeMounts:
-            - name: odoo-data16
+            - name: odoo-data19e
               mountPath: /var/lib/odoo
-            - name: odoo-extra-addons16
+            - name: odoo-extra-addons19e
               mountPath: /mnt/extra-addons
-            
-
       containers:
         # --- Contenedor 1: Odoo ---
-        - name: odoo16
-          image: proyectosspr/odoo_16_git:1.8-claude
+        # Este contenedor ejecuta Odoo como el proceso principal, que es la forma correcta.
+        - name: odoo19e
+          image: proyectosspr/odoo_19_git:1.3-claude
           imagePullPolicy: Always
+          # ==== ¡ESTE ES EL CAMBIO MÁS IMPORTANTE! ====
+          # Anulamos completamente el CMD del Dockerfile y le damos a Odoo el control.
           command: ["/usr/bin/odoo"]
           args:
             - "--config=/etc/odoo/odoo.conf"
-            - "--limit-time-cpu=8200"
-            - "--limit-time-real=8200"
             - "--dev=all"
-
-          # --- MEJORA 1: Contexto de Seguridad ---
-          # Forzamos al contenedor a correr como el usuario 'odoo' (101)
-          securityContext:
-            runAsUser: 101
-            runAsGroup: 101
-
           ports:
             - containerPort: 8069
               name: http
             - containerPort: 8072
               name: longpolling
+          # ... tu 'env', 'volumeMounts', y 'resources' van aquí, sin cambios ...
           env:
             - name: HTTP_X_FORWARDED_PROTO
               value: "https"
@@ -66,25 +56,24 @@ spec:
             - name: HOST
               value: "automateai.com.mx"
           volumeMounts:
-            - name: odoo-data16
+            - name: odoo-data19e
               mountPath: /var/lib/odoo
-            - name: config-volume16
+            - name: config-volume19e
               mountPath: /etc/odoo
               readOnly: true
-            - name: odoo-extra-addons16
+            - name: odoo-extra-addons19e
               mountPath: /mnt/extra-addons
-           
           resources:
             requests:
-              memory: "2Gi"
-              cpu: "1"
+              memory: "4Gi"
+              cpu: "3"
             limits:
-              memory: "15Gi"
-              cpu: "15"
+              memory: "6Gi"
+              cpu: "4"
 
         # --- Contenedor 2: Jupyter ---
-        - name: jupyter
-          image: proyectosspr/odoo_16_git:1.8-claude
+        - name: jupyter19e
+          image: proyectosspr/odoo_19_git:1.3-claude
           imagePullPolicy: Always
           command: ["jupyter", "lab"]
           args:
@@ -93,38 +82,28 @@ spec:
             - "--ServerApp.token=admin"
             - "--notebook-dir=/mnt/extra-addons"
             - "--no-browser"
-            # --- MEJORA 2: Se elimina '--allow-root' ---
-            # Ya no es necesario porque forzamos al usuario 101
-
-          # --- MEJORA 1 (Repetida): Contexto de Seguridad ---
-          securityContext:
-            runAsUser: 101
-            runAsGroup: 101
-
+            - "--allow-root"
           ports:
             - containerPort: 8888
               name: jupyter
           volumeMounts:
-            - name: odoo-data16
+            - name: odoo-data19e
               mountPath: /var/lib/odoo
-            - name: config-volume16
+            - name: config-volume19e
               mountPath: /etc/odoo
               readOnly: true
-            - name: odoo-extra-addons16
+            - name: odoo-extra-addons19e
               mountPath: /mnt/extra-addons
-
-
       volumes:
-        - name: odoo-data16
+        - name: odoo-data19e
           persistentVolumeClaim:
-            claimName: odoo-data16
-        - name: config-volume16
+            claimName: odoo-data19e
+        - name: config-volume19e
           configMap:
-            name: odoo-config16
+            name: odoo-config19e
             items:
               - key: odoo.conf
                 path: odoo.conf
-        - name: odoo-extra-addons16
+        - name: odoo-extra-addons19e
           persistentVolumeClaim:
-            claimName: odoo-extra-addons16
-
+            claimName: odoo-extra-addons19e
